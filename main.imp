@@ -1,0 +1,4 @@
+@main(args) {
+    println("Hello world!");
+    decl(var, get("https://tourizon.vercel.app/duh"));
+}
