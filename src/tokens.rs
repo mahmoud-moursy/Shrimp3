@@ -1,3 +1,6 @@
+#[derive(Debug)]
+/// The token enum -- holds all tokens before they get turned into
+/// an AST.
 pub enum Token {
 	/// Any values enclosed in [].
 	/// E.g: [32, 32, "Array!"]
@@ -8,15 +11,24 @@ pub enum Token {
 	Group(Vec<Token>),
 	/// Any string. 'Hello world!', "Hello world!"
 	/// or					'\'Hello world!\''
-	Str(&'static str),
+	Str(String),
 	/// Any int or float. 123, 1.23, 33.32
 	Num(f32),
 	/// Any letters not in a string.
-	Ident(&'static str),
-	/// Any function identifier.
-	/// E.g: @main
-	/// or	 @other_fn
-	FunctionIdent(),
-	/// Line ends (;)
+	Ident(String),
+	/// Function token `@`.
+	/// A.K.A At Symbol
+	FunctionDecl,
+	/// Line ends `;`
 	EndLine,
+	/// Curly brace opening `{`
+	OpenCurly,
+	/// Curly brace closing `}`
+	CloseCurly,
+	/// Bracket opening `(`
+	OpenBracket,
+	///Bracket closing `)`
+	CloseBracket,
+	/// Comma separator `,`
+	Comma,
 }
