@@ -6,12 +6,14 @@ use clap::Parser;
 mod lexer;
 mod errors;
 mod tokens;
+mod parser;
+mod nodes;
 
 #[derive(Debug, Parser)]
 struct Cli {
 	/// The Shrimp file to execute
 	file: String,
-
+	
 }
 
 fn main() -> Result<()> {

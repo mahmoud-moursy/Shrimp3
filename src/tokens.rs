@@ -1,14 +1,7 @@
 #[derive(Debug)]
-/// The token enum -- holds all tokens before they get turned into
-/// an AST.
+/// The token enum -- holds all token variants.
+/// - Very important for the AST.
 pub enum Token {
-	/// Any values enclosed in [].
-	/// E.g: [32, 32, "Array!"]
-	Array(Vec<Token>),
-	/// Any tokens enclosed in ().
-	/// E.g: (32, 32, "String!", [32, 32, "Array!"])
-	/// or   (10 + -3)
-	Group(Vec<Token>),
 	/// Any string. 'Hello world!', "Hello world!"
 	/// or					'\'Hello world!\''
 	Str(String),
@@ -27,8 +20,12 @@ pub enum Token {
 	CloseCurly,
 	/// Bracket opening `(`
 	OpenBracket,
-	///Bracket closing `)`
+	/// Bracket closing `)`
 	CloseBracket,
+	/// Square bracket opening `[`
+	OpenSquare,
+	/// Square bracket closing `]`
+	CloseSquare,
 	/// Comma separator `,`
 	Comma,
 }
