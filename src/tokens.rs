@@ -1,6 +1,10 @@
-#[derive(Debug)]
+use std::fmt::Formatter;
+
+use Token::*;
+
+#[derive(Debug, Clone, PartialEq)]
 /// The token enum -- holds all token variants.
-/// - Very important for the AST.
+/// - Used in generating the AST.
 pub enum Token {
 	/// Any string. 'Hello world!', "Hello world!"
 	/// or					'\'Hello world!\''
@@ -26,6 +30,24 @@ pub enum Token {
 	OpenSquare,
 	/// Square bracket closing `]`
 	CloseSquare,
-	/// Comma separator `,`
-	Comma,
+}
+
+impl std::fmt::Display for Token {
+	fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+		write!(f, "`{}`", match self {
+			// Each token's representation.
+			Str(string) => string.clone(),
+			Num(num) => num.to_string(),
+			Ident(ident) => ident.clone(),
+			// P	A  I	N 		A	U		 C H O C O L A T
+			FunctionDecl => "@".to_string(),
+			EndLine => ";".to_string(),
+			OpenCurly => "{".to_string(),
+			CloseCurly => "}".to_string(),
+			OpenBracket => "(".to_string(),
+			CloseBracket => ")".to_string(),
+			OpenSquare => "[".to_string(),
+			CloseSquare => "]".to_string(),
+		})
+	}
 }

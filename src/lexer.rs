@@ -88,7 +88,6 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
 			')' => final_out.push(Token::CloseBracket),
 			'[' => final_out.push(Token::OpenSquare),
 			']' => final_out.push(Token::CloseSquare),
-			',' => final_out.push(Token::Comma),
 			';' => final_out.push(Token::EndLine),
 			// Handles strings
 			'"' => {
@@ -142,7 +141,7 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
 				line_pos = 0;
 			}
 			any if any.is_whitespace() => { line_pos += 1; }
-			any => bail!(Err::UnexpectedToken(line_num, line_pos, any))
+			any => bail!(Err::UnexpectedChar(line_num, line_pos, any))
 		}
 		line_pos += 1;
 	}

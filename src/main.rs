@@ -10,10 +10,14 @@ mod parser;
 mod nodes;
 
 #[derive(Debug, Parser)]
+#[clap(version = "1.0", author = "T-O-R-U-S <bageliq@protonmail.com>")]
 struct Cli {
 	/// The Shrimp file to execute
 	file: String,
-	
+	/// Boolean -- decides whether to display the tokens or not.
+	/// Only for debugging purposes.
+	#[clap(short, long)]
+	display_tokens: bool,
 }
 
 fn main() -> Result<()> {
@@ -24,7 +28,12 @@ fn main() -> Result<()> {
 		File::open(&args.file)
 			.expect("Failed to open file. (Does it exist?)")
 	)?;
+	if args.display_tokens {
+		print!("TOKENS:");
+		println!("{:#?}", tokens);
+	}
+	// TODO: Use nodes in meaningful way.
+	let nodes = parser::parse(tokens)?;
 	
-	println!("{:?}", tokens);
 	Ok(())
 }
