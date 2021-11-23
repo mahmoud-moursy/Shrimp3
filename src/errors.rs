@@ -16,5 +16,4 @@ pub enum Err {
 	None => "the end of file.".to_string()
 	})]
 	UnexpectedToken(Option<Token>),
-	
 }

@@ -1,5 +1,9 @@
 // TODO: Implement parser.
 
+use std::borrow::BorrowMut;
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use anyhow::bail;
 
 use crate::errors::Err;
@@ -15,7 +19,7 @@ macro_rules! unwrap_or_eof {
 	}
 }
 
-pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
+pub unsafe fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
 	// Convert tokens -> terms.
 	let mut tokens =
 		tokens
@@ -28,7 +32,9 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
 	// Parse arrays first and foremost,
 	// then groups,
 	// then terms, then function expressions.
-	parse_array(&mut tokens)?;
+	parse_array(Rc::new(RefCell::new(&mut tokens)))?;
+	
+	println!("{:?}", tokens);
 	
 	Ok(final_out)
 }
@@ -40,39 +46,68 @@ pub enum State {
 }
 
 /// Parses arrays.
-pub fn parse_array(tokens: &mut Vec<Node>) -> anyhow::Result<()> {
-	let mut token_list = tokens.clone();
-	let mut token_list = token_list.iter_mut().enumerate();
+pub unsafe fn parse_array(tokens: Rc<RefCell<&mut Vec<Node>>>) -> anyhow::Result<()> {
+	let mut token_list = (*tokens).as_ptr();
+	
+	let mut tokens = (*token_list).iter_mut().enumerate();
 	
 	// State machine.
 	let mut state = State::Searching;
 	let mut passes: usize = 0;
+	let mut brack_count: usize = 1;
 	
-	for (idx, token) in token_list {
+	let mut re_process = false;
+	
+	for (idx, token) in tokens {
 		match state {
 			State::Searching => match token {
 				Node::Term(Token::OpenSquare) => {
-					*tokens.get_mut(idx).unwrap() = Node::Array(vec![]);
-					state = State::Growing(idx);
-				}
-				Node::Term(Token::CloseSquare) => bail!(
-					Err::UnexpectedToken(
-						Some(Token::CloseSquare)
-					)
-				),
+					*token = Node::Array(vec![]);
+					state = State::Growing(idx)
+				},
 				_ => {}
 			},
 			State::Growing(arr_idx) => {
-				match tokens.get_mut(arr_idx) {
-					Some(Node::Term(Token::CloseSquare)) => state = State::Searching,
-					Some(Node::Array(content)) => {}
+				match (*token_list).get_mut(arr_idx) {
+					Some(Node::Array(arr)) => {
+						arr.push(
+							match (*token_list).remove(idx - passes) {
+								Node::Term(tok) => match tok {
+									Token::Str(_)
+									| Token::Num(_)
+									| Token::Ident(_)
+									| Token::OpenBracket
+									| Token::CloseBracket
+									=> {
+										Node::Term(tok)
+									}
+									Token::OpenSquare => {
+										brack_count += 1;
+										re_process = true;
+										Node::Term(tok)
+									}
+									Token::CloseSquare => {
+										brack_count -= 1;
+										if brack_count < 1 {
+											break
+										}
+										Node::Term(tok)
+									}
+									any => bail!(Err::UnexpectedToken(Some(any)))
+								}
+								any => panic!("SPE: Expected node to be term, but was {:?}", any)
+							}
+						);
+						println!("{:?}", arr);
+						passes += 1;
+					}
 					any => {
-						panic!("Expected an Array node, found a {:?}", any);
+						panic!("The Shrimp parser had an internal error! (Expected node to be array, but was in fact a {:?})", any)
 					}
 				}
 			}
-		}
+		};
 	}
 	
-	todo!()
+	Ok(())
 }
