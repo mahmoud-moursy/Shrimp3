@@ -118,13 +118,12 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
 		}
 	}
 	
-	let mut tok_list = final_out.clone().into_iter();
-	
-	while let Some(thing) = tok_list.next() {
-		println!("{:?}", thing);
-	}
-	
 	Ok(final_out)
+}
+
+pub fn combine(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
+	// Getting tired. Will implement tmw.
+	todo!()
 }
 
 /*
