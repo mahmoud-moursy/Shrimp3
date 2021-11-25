@@ -1,5 +1,5 @@
 @main(32 32 32) {
-    decl(x [32.3 4.4 "Hi there."]);
+    decl(x [32.3 4.4 "Hi there." ["Hi again!"]]);
     print("Hello world! 🦐");
     print(x);
 }

@@ -16,4 +16,8 @@ pub enum Err {
 	None => "the end of file.".to_string()
 	})]
 	UnexpectedToken(Option<Token>),
+	#[error("User raised an error: {0}")]
+	RaisedError(String),
+	#[error("Unclosed delimiter {0}")]
+	UnclosedDelim(Token)
 }

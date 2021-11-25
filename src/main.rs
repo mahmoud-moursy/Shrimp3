@@ -21,25 +21,31 @@ struct Cli {
 }
 
 fn main() -> Result<()> {
-	unsafe {
+
 		let args = Cli::parse();
 		
 		// TODO: Use tokens in meaningful way.
-		let tokens = lexer::make_tokens(
-			File::open(
-				args.file.unwrap_or(
-					String::from("main.imp")
-				).as_str()
-			)
-				.expect("Failed to open file. (Does it exist?)")
-		)?;
-		if args.display_tokens {
-			print!("TOKENS:");
-			println!("{:#?}", tokens);
-		}
-		// TODO: Use nodes in meaningful way.
-		let nodes = parser::parse(tokens)?;
+	let mut tokens = lexer::make_tokens(
+		File::open(
+			args.file.unwrap_or(
+				String::from("main.imp")
+			).as_str()
+		)
+			.expect("Failed to open file. (Does it exist?)")
+	)?;
+	if args.display_tokens {
+		println!("TOKENS:");
+		println!("{:?}", tokens);
+		println!("END TOKENS");
 	}
+	// TODO: Use nodes in meaningful way.
+	let nodes = parser::parse(tokens)?;
+	
+	// This should NOT be here, and should NOT make it into
+	// the final release.
+	// TODO: Start properly debugging code?
+	// Mmmm, nah...
+	println!("{:?}", nodes);
 	
 	Ok(())
 }

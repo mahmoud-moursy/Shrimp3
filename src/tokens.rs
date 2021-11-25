@@ -40,14 +40,17 @@ impl std::fmt::Display for Token {
 			Num(num) => num.to_string(),
 			Ident(ident) => ident.clone(),
 			// P	A  I	N 		A	U		 C H O C O L A T
-			FunctionDecl => "@".to_string(),
-			EndLine => ";".to_string(),
-			OpenCurly => "{".to_string(),
-			CloseCurly => "}".to_string(),
-			OpenBracket => "(".to_string(),
-			CloseBracket => ")".to_string(),
-			OpenSquare => "[".to_string(),
-			CloseSquare => "]".to_string(),
+			any => match any {
+				FunctionDecl => "@",
+				EndLine => ";",
+				OpenCurly => "{",
+				CloseCurly => "}",
+				OpenBracket => "(",
+				CloseBracket => ")",
+				OpenSquare => "[",
+				CloseSquare => "]",
+				_ => { "Shrimp parser fmt::display has had an error. :(" }
+			}.to_string()
 		})
 	}
 }

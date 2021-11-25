@@ -13,6 +13,9 @@ pub enum Node {
 	/// E.g: fn(32, 32, "String!", [32, 32, "Array!"])
 	/// or   (add(10, -3))
 	Group(Vec<Node>),
+	/// Any tokens enclosed in {}.
+	/// E.g: { print("Hello world!"); }
+	Block(Vec<Node>),
 	/// Any call expression
 	/// i.e: print("Hello world! 🦐")
 	CallExpr {
@@ -27,7 +30,7 @@ pub enum Node {
 	/// ```
 	FunctionDecl {
 		name: String,
-		args: &'static Node,
+		args: Vec<Node>,
 		nodes: Vec<Node>,
 	},
 }
