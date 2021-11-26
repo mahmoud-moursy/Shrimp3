@@ -1,5 +1,12 @@
-@main(32 32 32) {
+@main(x y z) {
     decl(x [32.3 4.4 "Hi there." ["Hi again!"]]);
+    print(x);
+    add(3 -3) -> x;
     print("Hello world! 🦐");
     print(x);
+    print();
+}
+
+@secondary(x y z) {
+    print("Hello world")
 }
