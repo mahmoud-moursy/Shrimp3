@@ -1,10 +1,21 @@
+use crate::errors::Err;
 use crate::nodes::Node;
+
 use std::{
     collections::HashMap,
     fmt::{Debug, Display},
 };
 
+use anyhow::bail;
+
+pub enum Stack {
+    KeyVal(String, Box<Stack>),
+    Constant(Variable),
+}
+
+#[derive(Clone)]
 pub enum Variable {
+    Ident(String),
     Str(String),
     Num(f32),
     Bool(bool),
@@ -15,21 +26,31 @@ pub enum Variable {
 }
 
 impl std::fmt::Display for Variable {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> anyhow::Result<(), std::fmt::Error> {
         use Variable::*;
         write!(
             f,
             "{}",
             match self {
+                Ident(string) => panic!("{}", Err::UndefinedVar(self.clone())),
                 Str(string) => string.to_string(),
                 Num(num) => num.to_string(),
                 Bool(var) => var.to_string(),
                 Array(arr) => {
-                    String::new()
+                    let mut out = String::from("[");
+                    for i in arr {
+                        // Kinda jank.
+                        // Pushes the std::fmt::Display impl
+                        // of the inner variable enum to the
+                        // string
+                        out.extend(i.to_string().chars())
+                    }
+                    out.push(']');
+                    out
                 }
                 Function(func) => match func {
                     Node::FunctionDecl { name, args, nodes } => {
-                        format!("@{} [{:?}] -> {{ {:?} }}", name, args, nodes.join("\n"))
+                        format!("@{} [{:?}] -> {{ {:?} }}", name, args, nodes)
                     }
                     any => panic!("SPE: FunctionDecl was in fact {}", any.as_words()),
                 },
@@ -37,6 +58,21 @@ impl std::fmt::Display for Variable {
                     String::from("<[Native function representing not supported.]>")
                 }
                 Void => String::from("()"),
+            }
+        )
+    }
+}
+
+impl std::fmt::Debug for Variable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> anyhow::Result<(), std::fmt::Error> {
+        use Variable::*;
+        write!(
+            f,
+            "{}",
+            match self {
+                NativeFunction(func) =>
+                    String::from("<[Native function representing not supported.]>"),
+                any => any.to_string(),
             }
         )
     }

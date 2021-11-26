@@ -49,5 +49,7 @@ fn main() -> Result<()> {
     // Mmmm, nah...
     println!("{:?}", nodes);
 
+    interpreter::interpret(nodes)?;
+
     Ok(())
 }

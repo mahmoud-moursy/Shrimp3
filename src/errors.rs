@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+use crate::data_types::Variable;
 use crate::nodes::Node;
 use crate::tokens::Token;
 
@@ -22,9 +23,15 @@ pub enum Err {
             None => "the end of file.".to_string()
         })]
     UnexpectedNode(Option<Node>),
-    #[error("Mismatched types. Expected {0}, found {} instead.", match .1 {
-            Some(node) => node.to_string(),
+    #[error("Mismatched types. Expected {}, found {} instead.", .0.as_words(), match .1 {
+            Some(node) => node.as_words(),
             None => "nothing".to_string()
     })]
     TypeMismatch(Node, Option<Node>),
+    #[error("Undefined variable `{0}`")]
+    UndefinedVar(Variable),
+    #[error("Missing an argument in a function call `{0}`")]
+    MissingArgs(String),
+    #[error("No defined main function!")]
+    NoMain,
 }

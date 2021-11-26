@@ -53,6 +53,14 @@ impl Node {
             ),
         }
     }
+    pub fn as_var(self) -> Variable {
+        match self {
+            Node::Array(arr) => Variable::Array(arr.into_iter().map(|x| x.as_var()).collect()),
+            Node::Term(Token::Num(num)) => Variable::Num(num),
+            Node::Term(Token::Str(string)) => Variable::Str(string),
+            _ => todo!(),
+        }
+    }
 }
 
 impl std::fmt::Display for Node {
