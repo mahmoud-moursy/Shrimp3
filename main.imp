@@ -1,12 +1,12 @@
 use internet
 
 @main(x) {
-    decl(x [32.3 4.4 "Hi there." ["Hi again!"]]);
-    print(x);
-    add(3 -3) -> x;
-    print("Hello world! 🦐");
-    print(x);
-    print();
+    decl x [32.3 4.4 "Hi there." ["Hi again!"]]
+    println(x)
+    add(3 -3) -> x
+    println("Hello world! 🦐")
+    println(x)
+    print()
 }
 
 @secondary(x y z) {

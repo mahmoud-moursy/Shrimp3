@@ -29,11 +29,14 @@ impl std::fmt::Display for Variable {
                 Array(arr) => {
                     let mut out = String::from("[");
                     for i in arr {
+                        out.push(' ');
                         // Kinda jank.
                         // Pushes the std::fmt::Display impl
                         // of the inner variable enum to the
                         // string
-                        out.extend(i.to_string().chars())
+                        out.extend(i.to_string().chars());
+
+                        out.push(' ');
                     }
                     out.push(']');
                     out

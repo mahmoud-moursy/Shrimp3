@@ -58,7 +58,7 @@ impl Node {
             Node::Array(arr) => Variable::Array(arr.into_iter().map(|x| x.as_var()).collect()),
             Node::Term(Token::Num(num)) => Variable::Num(num),
             Node::Term(Token::Str(string)) => Variable::Str(string),
-            _ => todo!(),
+            any => todo!("cannot turn into variable: {:?}", any),
         }
     }
 }

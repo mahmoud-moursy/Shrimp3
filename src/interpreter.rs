@@ -58,7 +58,7 @@ pub fn run(
     variables: &mut HashMap<String, Variable>,
     mut args: Vec<Variable>,
     assign_to: Option<String>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<Variable> {
     let mut func = match func {
         Some(Variable::Function(func)) => match func {
             Node::FunctionDecl { name, args, nodes } => (name, args, nodes),
@@ -68,11 +68,11 @@ pub fn run(
             let res = exec(args, variables);
             match assign_to {
                 Some(val) => {
-                    variables.insert(val, res);
+                    variables.insert(val, res.clone());
                 }
                 None => {}
             };
-            return Ok(());
+            return Ok(res);
         }
         any => todo!(),
     };
@@ -94,19 +94,78 @@ pub fn run(
         }
     }
 
-    for node in func.2.into_iter() {
+    let mut func = func.2.into_iter();
+
+    while let Some(node) = func.next() {
         match node {
+            Node::Term(Token::Ident(id)) => {
+                match id.as_str() {
+                    "decl" => match func.next() {
+                        Some(Node::Term(Token::Ident(var))) => match func.next() {
+                            Some(tok) => {
+                                variables.insert(var, tok.as_var());
+                            }
+                            any => bail!(Err::UnexpectedNode(any)),
+                        },
+                        any => bail!(Err::UnexpectedNode(any)),
+                    },
+                    "return" => match func.next() {
+                        Some(Node::Term(tok)) => match tok {
+                            Token::Ident(id) => variables.get(&id),
+                            any => any.as_var(),
+                        },
+                        any => bail!(Err::UnexpectedNode(any)),
+                    },
+                    any => {
+                        panic!("Unknown keyword {}", any)
+                    }
+                };
+            }
             Node::CallExpr {
                 name,
                 args,
                 assign_to,
-            } => {}
-            any => todo!(
-                "SPE TODO ERR: incorrect type of expr found in node (non-call expr) {}",
-                any
-            ),
+            } => {
+                match variables.get(&name) {
+                    Some(Variable::Function(fndecl)) => {
+                        run(
+                            Some(Variable::Function(fndecl.clone())),
+                            variables,
+                            args.into_iter()
+                                .map(|x| match x {
+                                    Node::Term(Token::Ident(var)) => {
+                                        variables.get(&var).unwrap().clone()
+                                    }
+                                    any => any.as_var(),
+                                })
+                                .collect(),
+                            assign_to,
+                        )?;
+                    }
+                    Some(Variable::NativeFunction(func)) => {
+                        func(
+                            args.into_iter()
+                                .map(|x| match x {
+                                    Node::Term(Token::Ident(var)) => {
+                                        variables.get(&var).unwrap().clone()
+                                    }
+                                    any => any.as_var(),
+                                })
+                                .collect(),
+                            variables,
+                        );
+                    }
+                    None => panic!("Nonexistent function called"),
+                    any => panic!("Incorrect variable typed called as function."),
+                };
+            }
+            any => println!("potential runtime err ignored for debugging purposes"),
         }
     }
 
-    Ok(())
+    if let Some(string) = assign_to {
+        variables.insert(string, todo!());
+    }
+
+    Ok(Variable::Void)
 }

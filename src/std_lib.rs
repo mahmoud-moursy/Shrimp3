@@ -47,18 +47,6 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             std::io::stdout().flush().unwrap();
             Variable::Void
         }
-        "decl" => |mut args, vars| {
-            if args.get(0).is_some() && args.get(1).is_some() {
-                return if let Some(var) = vars.insert(
-                    match args.remove(0) {
-                        Variable::Ident(id) => id,
-                        any => todo!("{}", any)
-                    },
-                    args.remove(0)
-                ) { var } else { Variable::Void }
-            }
-            panic!("{}", Err::MissingArgs("ident".to_string()))
-        }
         "add" => |args, _| {
             let mut args = args.into_iter();
 
