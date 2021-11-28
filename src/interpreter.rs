@@ -59,7 +59,7 @@ pub fn run(
     mut args: Vec<Variable>,
     assign_to: Option<String>,
 ) -> anyhow::Result<Variable> {
-    let mut func = match func {
+    let func = match func {
         Some(Variable::Function(func)) => match func {
             Node::FunctionDecl { name, args, nodes } => (name, args, nodes),
             any => panic!("{}", Err::UnexpectedNode(Some(any))),
@@ -94,6 +94,20 @@ pub fn run(
         }
     }
 
+    macro_rules! arr_into_var {
+        ($args: expr) => {
+            Variable::Array(
+                $args
+                    .into_iter()
+                    .map(|x| match x {
+                        Node::Term(Token::Ident(var)) => variables.get(&var).unwrap().clone(),
+                        any => any.as_var(),
+                    })
+                    .collect(),
+            )
+        };
+    }
+
     let mut func = func.2.into_iter();
 
     while let Some(node) = func.next() {
@@ -111,10 +125,25 @@ pub fn run(
                     },
                     "return" => match func.next() {
                         Some(Node::Term(tok)) => match tok {
-                            Token::Ident(id) => variables.get(&id),
-                            any => any.as_var(),
+                            Token::Ident(id) => return Ok(variables.get(&id).unwrap().clone()),
+                            any => return Ok(any.as_var()),
                         },
+                        Some(Node::Array(arr)) => return Ok(arr_into_var!(arr)),
                         any => bail!(Err::UnexpectedNode(any)),
+                    },
+                    "use" => match func.next() {
+                        Some(node) => match node {
+                            Node::Term(Token::Ident(lib)) => match lib.as_str() {
+                                "internet" => std_lib::internet(variables),
+                                any => {
+                                    bail!(Err::UnknownLib(Node::Term(Token::Ident(
+                                        any.to_string()
+                                    ))))
+                                }
+                            },
+                            any => bail!(Err::UnknownLib(any)),
+                        },
+                        None => bail!(Err::EOF),
                     },
                     any => {
                         panic!("Unknown keyword {}", any)
@@ -142,29 +171,43 @@ pub fn run(
                             assign_to,
                         )?;
                     }
-                    Some(Variable::NativeFunction(func)) => {
-                        func(
-                            args.into_iter()
-                                .map(|x| match x {
-                                    Node::Term(Token::Ident(var)) => {
-                                        variables.get(&var).unwrap().clone()
-                                    }
-                                    any => any.as_var(),
-                                })
-                                .collect(),
-                            variables,
-                        );
-                    }
+                    Some(Variable::NativeFunction(func)) => match assign_to {
+                        Some(string) => {
+                            *variables.get_mut(&string).unwrap() = func(
+                                args.into_iter()
+                                    .map(|x| match x {
+                                        Node::Term(Token::Ident(var)) => {
+                                            variables.get(&var).unwrap().clone()
+                                        }
+                                        any => any.as_var(),
+                                    })
+                                    .collect(),
+                                variables,
+                            );
+                        }
+                        None => {
+                            func(
+                                args.into_iter()
+                                    .map(|x| match x {
+                                        Node::Term(Token::Ident(var)) => {
+                                            variables.get(&var).unwrap().clone()
+                                        }
+                                        any => any.as_var(),
+                                    })
+                                    .collect(),
+                                variables,
+                            );
+                        }
+                    },
                     None => panic!("Nonexistent function called"),
                     any => panic!("Incorrect variable typed called as function."),
                 };
             }
+            /*  FIXME: This happens with valid code because of a parser
+                      error.
+            */
             any => println!("potential runtime err ignored for debugging purposes"),
         }
-    }
-
-    if let Some(string) = assign_to {
-        variables.insert(string, todo!());
     }
 
     Ok(Variable::Void)

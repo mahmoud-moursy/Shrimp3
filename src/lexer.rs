@@ -37,7 +37,7 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
                 // a non ascii-alphanumeric character is found.
                 while let Some(code) = char_list.peek() {
                     // Break loop if code is not alphanumeric
-                    if !code.is_ascii_alphanumeric() {
+                    if !code.is_ascii_alphanumeric() && *code != '_' {
                         break;
                     }
                     out.push(char_list.next().unwrap());

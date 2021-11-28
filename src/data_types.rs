@@ -56,6 +56,45 @@ impl std::fmt::Display for Variable {
     }
 }
 
+impl std::cmp::PartialEq for Variable {
+    fn eq(&self, rhs: &Variable) -> bool {
+        return match self {
+            Variable::Ident(x) => panic!("Cannot compare idents"),
+            Variable::Array(arr) => {
+                arr == match rhs {
+                    Variable::Array(arr) => arr,
+                    _ => return false,
+                }
+            }
+            Variable::Bool(b) => {
+                b == match rhs {
+                    Variable::Bool(b) => b,
+                    _ => return false,
+                }
+            }
+            Variable::Str(string) => {
+                string
+                    == match rhs {
+                        Variable::Str(string) => string,
+                        _ => return false,
+                    }
+            }
+            Variable::Function(_) => panic!("Cannot compare functions"),
+            Variable::NativeFunction(_) => panic!("Cannot compare functions"),
+            Variable::Num(num) => {
+                num == match rhs {
+                    Variable::Num(num) => num,
+                    _ => return false,
+                }
+            }
+            Variable::Void => match rhs {
+                Variable::Void => true,
+                _ => false,
+            },
+        };
+    }
+}
+
 impl std::fmt::Debug for Variable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> anyhow::Result<(), std::fmt::Error> {
         use Variable::*;

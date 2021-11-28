@@ -36,18 +36,11 @@ fn main() -> Result<()> {
         println!("{:?}", tokens);
         println!("END TOKENS");
     }
-    // TODO: Use nodes in meaningful way.
     let nodes = parser::parse(tokens)?;
 
     let nodes = parser::make_fn(nodes)?;
 
     let nodes = parser::make_fn_call(nodes)?;
-
-    // This should NOT be here, and should NOT make it into
-    // the final release.
-    // TODO: Start properly debugging code?
-    // Mmmm, nah...
-    println!("{:?}", nodes);
 
     interpreter::interpret(nodes)?;
 

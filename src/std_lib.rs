@@ -32,6 +32,17 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             println!("Hello world!");
             Variable::Void
         }
+        "eq" => |args, _| {
+            let mut args = args.into_iter();
+            let mut last = args.next().unwrap();
+            while let Some(arg) = args.next() {
+                if arg != last {
+                    return Variable::Bool(false)
+                }
+                last = arg;
+            }
+            Variable::Bool(true)
+        }
         "print" => |args, _| {
             for i in args {
                 print!("{}", i)

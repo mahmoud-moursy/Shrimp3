@@ -1,14 +1,19 @@
-use internet
-
 @main(x) {
-    decl x [32.3 4.4 "Hi there." ["Hi again!"]]
+    use internet
+    decl x [[32.3 4.4 "Hi there."]]
     println(x)
-    add(3 -3) -> x
     println("Hello world! 🦐")
     println(x)
     print()
+    secondary(3 2 1) -> x
+    println("X is: " x)
+    secondary(add(3 3) 5 5) -> x
+    println(x)
+    println("Hello world")
 }
 
 @secondary(x y z) {
-    print("Hello world")
+    println("Hello world")
+    add(x y z) -> x
+    return x
 }

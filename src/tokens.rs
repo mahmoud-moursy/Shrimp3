@@ -1,6 +1,7 @@
 use std::fmt::Formatter;
 
 use Token::*;
+use crate::data_types::Variable;
 
 #[derive(Debug, Clone, PartialEq)]
 /// The token enum -- holds all token variants.
@@ -36,6 +37,14 @@ pub enum Token {
 }
 
 impl Token {
+    pub fn as_var(self) -> Variable {
+        match self {
+            Str(string) => Variable::Str(string),
+            Num(num) => Variable::Num(num),
+            Ident(id) => Variable::Ident(id),
+            any => panic!("Tried to convert incorrect data: {:?}", any)
+        }
+    }
     pub fn as_words(&self) -> String {
         match self {
             // Everything in Token is imported into the scope
