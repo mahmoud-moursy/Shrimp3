@@ -1,17 +1,7 @@
 use crate::errors::Err;
 use crate::nodes::Node;
 
-use std::{
-    collections::HashMap,
-    fmt::{Debug, Display},
-};
-
-use anyhow::bail;
-
-pub enum Stack {
-    KeyVal(String, Box<Stack>),
-    Constant(Variable),
-}
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub enum Variable {
@@ -77,5 +67,3 @@ impl std::fmt::Debug for Variable {
         )
     }
 }
-
-pub type Scope = HashMap<String, HashMap<String, Variable>>;

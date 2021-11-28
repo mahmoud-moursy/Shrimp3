@@ -2,7 +2,7 @@ use crate::data_types::*;
 use crate::errors::Err;
 use crate::nodes::Node;
 
-use crate::std_lib::construct_lib;
+use crate::std_lib::{self, construct_lib};
 use crate::tokens::Token;
 
 use std::collections::HashMap;
@@ -10,83 +10,101 @@ use std::collections::HashMap;
 use anyhow::bail;
 
 pub fn interpret(nodes: Vec<Node>) -> anyhow::Result<()> {
-    let mut scope = Scope::new();
-
-    scope.insert("!global".to_string(), construct_lib());
+    let mut variables = construct_lib();
 
     let mut nodes = nodes.into_iter();
 
-    while let Some(val) = nodes.next() {
-        match val {
-            // Only function decls should be at the top level
+    while let Some(node) = nodes.next() {
+        match node {
             Node::FunctionDecl { name, args, nodes } => {
-                scope.get_mut("!global").unwrap().insert(
+                variables.insert(
                     name.clone(),
                     Variable::Function(Node::FunctionDecl { name, args, nodes }),
                 );
             }
-            any => {
-                bail!(Err::UnexpectedNode(Some(any)))
-            }
+            Node::Term(Token::Ident(id)) => match id.as_str() {
+                "use" => match nodes.next() {
+                    Some(node) => match node {
+                        Node::Term(Token::Ident(lib)) => match lib.as_str() {
+                            "internet" => std_lib::internet(&mut variables),
+                            any => {
+                                bail!(Err::UnknownLib(Node::Term(Token::Ident(any.to_string()))))
+                            }
+                        },
+                        any => bail!(Err::UnknownLib(any)),
+                    },
+                    None => bail!(Err::EOF),
+                },
+                any => bail!(Err::UnexpectedNode(Some(Node::Term(Token::Ident(id))))),
+            },
+            any => todo!(),
         }
     }
 
-    run_main(scope)
+    run(
+        variables.remove("main"),
+        &mut variables,
+        vec![Variable::Array(
+            std::env::args().map(|x| Variable::Str(x)).collect(),
+        )],
+        None,
+    )?;
+
+    Ok(())
 }
 
-struct FuncDecl {
-    name: String,
-    args: Vec<Node>,
-    nodes: Vec<Node>,
-}
-
-pub fn run_main(mut scopes: Scope) -> anyhow::Result<()> {
-    let main = match scopes.get("!global").unwrap().get("main") {
-        Some(data) => match data {
-            Variable::Function(func) => match func.clone() {
-                Node::FunctionDecl { name, args, nodes } => FuncDecl { name, args, nodes },
-                _ => todo!(),
-            },
-            _ => todo!(),
+pub fn run(
+    func: Option<Variable>,
+    variables: &mut HashMap<String, Variable>,
+    mut args: Vec<Variable>,
+    assign_to: Option<String>,
+) -> anyhow::Result<()> {
+    let mut func = match func {
+        Some(Variable::Function(func)) => match func {
+            Node::FunctionDecl { name, args, nodes } => (name, args, nodes),
+            any => panic!("{}", Err::UnexpectedNode(Some(any))),
         },
-        None => {
-            todo!()
+        Some(Variable::NativeFunction(exec)) => {
+            let res = exec(args, variables);
+            match assign_to {
+                Some(val) => {
+                    variables.insert(val, res);
+                }
+                None => {}
+            };
+            return Ok(());
         }
+        any => todo!(),
     };
 
-    for node in main.nodes {
+    if args.len() != func.1.len() {
+        // TODO: Impl errors.rs error
+        todo!("Incorrect arg count")
+    }
+
+    let mut temp_vars = vec![];
+
+    for var in func.1.into_iter() {
+        match var {
+            Node::Term(Token::Ident(id)) => {
+                temp_vars.push(id.clone());
+                variables.insert(id, args.remove(0));
+            }
+            any => panic!("{}", any),
+        }
+    }
+
+    for node in func.2.into_iter() {
         match node {
             Node::CallExpr {
                 name,
                 args,
                 assign_to,
-            } => {
-                match scopes.get("!global").unwrap().get(&name) {
-                    Some(Variable::NativeFunction(exec)) => {
-                        let mut res = exec(
-                            args.into_iter()
-                                .map(|x| match x {
-                                    Node::Term(Token::Ident(string)) => {
-                                        scopes.get(&main.name).unwrap().get(&string).unwrap()
-                                    }
-                                    x => x.as_var(),
-                                })
-                                .collect(),
-                            scopes.get_mut(&main.name).unwrap(),
-                        );
-                        if let Some(var) = assign_to {
-                            scopes
-                                .get_mut(&main.name)
-                                .unwrap()
-                                .get_mut(&var)
-                                .insert(&mut res);
-                        }
-                    }
-                    Some(any) => todo!(),
-                    None => todo!(),
-                };
-            }
-            any => bail!("{}", any),
+            } => {}
+            any => todo!(
+                "SPE TODO ERR: incorrect type of expr found in node (non-call expr) {}",
+                any
+            ),
         }
     }
 

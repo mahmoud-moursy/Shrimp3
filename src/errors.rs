@@ -7,10 +7,12 @@ use crate::tokens::Token;
 /// Stores all user-made error types
 #[derive(Error, Debug)]
 pub enum Err {
+    // Should not be here, kept due to laziness.
     #[error("Unexpected EOF in line {0} at char {1}")]
     UnexpectedEOF(usize, usize),
-    /// The parser has no character-specific debug info,
-    /// so it can't say at exactly which char/line.
+    // TODO: Get rid of this and change the delete UnexpectedEOF
+    #[error("Unexpected EOF")]
+    EOF,
     #[error("Unexpected character `{2}` in line {0} at char {1}")]
     UnexpectedChar(usize, usize, char),
     #[error("Found an unexpected token near {}", match.0 {
@@ -32,6 +34,8 @@ pub enum Err {
     UndefinedVar(Variable),
     #[error("Missing an argument in a function call `{0}`")]
     MissingArgs(String),
+    #[error("Unknown library specified `{0:?}`")]
+    UnknownLib(Node),
     #[error("No defined main function!")]
     NoMain,
 }

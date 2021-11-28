@@ -1,21 +1,22 @@
 use std::collections::HashMap;
+use std::io::Write;
 
 use crate::data_types::*;
-use crate::nodes::Node;
-use crate::tokens::Token;
-
-use anyhow::bail;
-
-use std::io::Write;
 
 use crate::errors::Err;
 
 pub fn construct_lib() -> HashMap<String, Variable> {
-    let mut map: HashMap<String, Variable> = HashMap::new();
+    let mut map = HashMap::new();
 
     map.insert("void".to_string(), Variable::Void);
+
     map.insert("true".to_string(), Variable::Bool(true));
     map.insert("false".to_string(), Variable::Bool(false));
+
+    map.insert("num_max".to_string(), Variable::Num(f32::MAX));
+    map.insert("num_min".to_string(), Variable::Num(f32::MIN));
+
+    map.insert("num_pi".to_string(), Variable::Num(std::f32::consts::PI));
 
     macro_rules! insert_fn {
         (
@@ -155,4 +156,57 @@ pub fn construct_lib() -> HashMap<String, Variable> {
     );
 
     map
+}
+
+/// Provides basic HTTP request support (GET, POST)
+/// No other HTTP verbs supported (due to laziness :)
+pub fn internet(map: &mut HashMap<String, Variable>) {
+    macro_rules! insert_fn {
+        (
+				$(
+					$name: expr => $val: expr
+				)*
+			) => {
+            $( map.insert("internet_".to_string() + $name, Variable::NativeFunction($val)); )*
+        };
+    }
+    insert_fn! {
+        "get" => |mut args, _| {
+            if args.len() != 1 {
+                panic!("Incorrect argument count")
+            }
+            let args = match args.remove(0) {
+                Variable::Str(string) => string,
+                any => panic!("Incorrect type: {}", any)
+            };
+            Variable::Str(
+                reqwest::blocking::get(args).unwrap().text().unwrap()
+            )
+        }
+        "post" => |mut args, _| {
+            if args.len() != 2 {
+                panic!("Incorrect argument count")
+            }
+
+            let url = match args.remove(0) {
+                Variable::Str(string) => string,
+                any => panic!("Argument mismatch")
+            };
+
+            let body = match args.remove(0) {
+                Variable::Str(body) => body,
+                any => panic!("Argument mismatch")
+            };
+
+            let client = reqwest::blocking::Client::new();
+            let res = client.post(url)
+                .body(body)
+                .send()
+                .unwrap()
+                .text()
+                .unwrap();
+
+            Variable::Str(res)
+        }
+    };
 }

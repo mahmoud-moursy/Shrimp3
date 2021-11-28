@@ -8,8 +8,10 @@ edition = "2018"
 [dependencies]
 # std::error::Error implemenation
 # for errors.
-thiserror = "*"
+thiserror = "1.0.30"
 # Prettier error messages
-anyhow = "*"
+anyhow = "1.0.49"
 # Command line arg parsing.
 clap = "3.0.0-beta.5"
+# Internet lib
+reqwest = { version = "0.11.6", features = ["blocking"] }
