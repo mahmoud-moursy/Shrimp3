@@ -8,8 +8,6 @@ Oh, and also, `$` to access variables is being removed! (Yay!)
 
 Libraries are here! Check out the [internet library](internet.md)!
 
-**Shrimp3 is not yet turing-complete! (No flow control)**
-
 ### TODOs:
 
 - Array manipulation
