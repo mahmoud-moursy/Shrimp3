@@ -126,7 +126,8 @@ pub fn run(
             match variables.get_mut(&$var_name) {
                 Some(var) => var,
                 None => {
-                    panic!(Err::NonexistentVar($var_name));
+                    variables.insert($var_name.clone(), Variable::Void);
+                    variables.get_mut(&$var_name).unwrap()
                 }
             }
         };

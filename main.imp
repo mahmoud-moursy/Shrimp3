@@ -1,6 +1,5 @@
 @main(args) {
-  println("testing testing 123")
-  for range(0 1000) => count {
-    println(count)
-  }
+  add(3 3) -> x
+  # Prints out 6 (WOW! SO COOL!) #
+  println(x)
 }
