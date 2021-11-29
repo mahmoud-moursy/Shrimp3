@@ -8,13 +8,12 @@ Oh, and also, `$` to access variables is being removed! (Yay!)
 
 Libraries are here! Check out the [internet library](internet.md)!
 
-**Shrimp3 is not yet turing-complete!**
+**Shrimp3 is not yet turing-complete! (No flow control)**
 
 ### TODOs:
 
 - Array manipulation
 - While loops
-- If statements
 ### FIXMEs:
 - Fix bug where the rest of the args will not be collected and sent to the program
 

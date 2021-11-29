@@ -49,6 +49,23 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
             Variable::Bool(true)
         }
+        "cmp" => |args, _| {
+            if args.len() < 2 {
+                panic!(Err::MissingArgs("cmp".to_string()))
+            }
+
+            let mut args = args.into_iter();
+
+            let to_cmp = args.next().unwrap();
+
+            while let Some(arg) = args.next() {
+                if to_cmp < arg {
+                    return Variable::Bool(false)
+                }
+            }
+
+            Variable::Bool(true)
+        }
         "print" => |args, _| {
             for i in args {
                 print!("{}", i)

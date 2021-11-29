@@ -113,6 +113,18 @@ impl std::cmp::PartialEq for Variable {
     }
 }
 
+impl std::cmp::PartialOrd for Variable {
+    fn partial_cmp(&self, rhs: &Variable) -> Option<std::cmp::Ordering> {
+        match self {
+            Variable::Num(num) => match rhs {
+                Variable::Num(num_2) => num.partial_cmp(num_2),
+                any => panic!(Err::VarTypeMismatch(Variable::Num(0.0), any.clone())),
+            },
+            any => panic!(Err::VarTypeMismatch(Variable::Num(0.0), any.clone())),
+        }
+    }
+}
+
 impl std::fmt::Debug for Variable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> anyhow::Result<(), std::fmt::Error> {
         use Variable::*;

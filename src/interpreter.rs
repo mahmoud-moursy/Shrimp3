@@ -170,6 +170,36 @@ pub fn run(
                         },
                         None => bail!(Err::EOF),
                     },
+                    "if" => match func.next() {
+                        Some(thing) => match into_var(vec![thing], variables).remove(0) {
+                            Variable::Bool(boolean) => {
+                                if boolean {
+                                    run(
+                                        Some(Variable::Function(Node::FunctionDecl {
+                                            name: "if statement".to_string(),
+                                            args: vec![],
+                                            nodes: match func.next() {
+                                                Some(Node::Block(arr)) => arr,
+                                                any => panic!(Err::UnexpectedNode(any)),
+                                            },
+                                        })),
+                                        variables,
+                                        args.clone(),
+                                        assign_to.clone(),
+                                    )?;
+                                } else {
+                                    // Ensure that syntax is proper even
+                                    // if the statement was false.
+                                    match func.next() {
+                                        Some(Node::Block(_)) => {}
+                                        any => panic!(Err::UnexpectedNode(any)),
+                                    }
+                                }
+                            }
+                            any => panic!(Err::VarTypeMismatch(Variable::Bool(true), any)),
+                        },
+                        None => panic!(Err::EOF),
+                    },
                     any => {
                         panic!(Err::UnknownKeyword(any.to_string()))
                     }
@@ -202,16 +232,18 @@ pub fn run(
                             func(res, variables);
                         }
                     },
-                    None => panic!(Err::NonexistentVar(name)),
+                    None => {
+                        if name == "if" {
+                            println!("Don't put a group (any tokens enclosed in brackets) after an if statement!");
+                        }
+                        panic!(Err::NonexistentVar(name))
+                    }
                     any => panic!(Err::VarTypeMismatch(
                         Variable::Function(Node::Array(vec![])),
                         any.unwrap().clone()
                     )),
                 };
             }
-            /*  FIXME: This happens with valid code because of a parser
-                       error.
-            */
             any => panic!(Err::UnexpectedNode(Some(any))),
         }
     }

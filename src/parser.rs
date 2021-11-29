@@ -58,7 +58,7 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
                 out.pop();
             }
 
-            final_out.push($out(out));
+            final_out.push($out(make_fn_call(out)?));
         };
     }
 

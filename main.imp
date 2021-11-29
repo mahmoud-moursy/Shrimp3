@@ -1,7 +1,7 @@
 @main(x) {
     use fs
 
-    decl x [3 3 [33]]
-
-    println(x)
+    if cmp(2 1) {
+        println("Hello world")
+    }
 }
