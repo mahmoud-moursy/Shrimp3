@@ -62,7 +62,28 @@ impl Clone for Node {
     fn clone(&self) -> Self {
         match self {
             Node::Term(any) => Node::Term(any.clone()),
-            _ => self.clone(),
+            Node::Array(arr) => Node::Array(arr.clone()),
+            Node::Group(arr) => Node::Group(arr.clone()),
+            Node::Block(arr) => Node::Group(arr.clone()),
+            Node::CallExpr {
+                name,
+                args,
+                assign_to
+            } => 
+            Node::CallExpr {
+                name: name.clone(),
+                args: args.clone(),
+                assign_to: assign_to.clone()
+            },
+            Node::FunctionDecl {
+                name,
+                args,
+                nodes
+            } => Node::FunctionDecl {
+                name: name.clone(),
+                args: args.clone(),
+                nodes: nodes.clone()
+            },
         }
     }
 }

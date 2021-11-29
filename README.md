@@ -13,7 +13,7 @@ Libraries are here! Check out the [internet library](internet.md)!
 - Array manipulation
 - While loops
 ### FIXMEs:
-- Fix bug where the rest of the args will not be collected and sent to the program
+- Fix bug where the rest of the args will not be collected and sent to the program (low priority)
 
 ### Basic syntax
 

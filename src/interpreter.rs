@@ -200,6 +200,41 @@ pub fn run(
                         },
                         None => panic!(Err::EOF),
                     },
+                    "for" => match func.next() {
+                        Some(node) => match into_var(vec![node], variables).remove(0) {
+                            Variable::Array(arr) => match func.next() {
+                                Some(Node::Term(Token::ArrowAssigner)) => match func.next() {
+                                    Some(Node::Term(Token::Ident(id))) => {
+                                        let block = match func.next() {
+                                            Some(Node::Block(block)) => block,
+                                            None => panic!(Err::EOF),
+                                            any => panic!(Err::UnexpectedNode(any)),
+                                        };
+
+                                        for var in arr {
+                                            variables.insert(id.clone(), var);
+                                            run(
+                                                Some(Variable::Function(Node::FunctionDecl {
+                                                    name: "while loop".to_string(),
+                                                    args: vec![],
+                                                    nodes: block.clone(),
+                                                })),
+                                                variables,
+                                                args.clone(),
+                                                assign_to.clone(),
+                                            )?;
+                                        }
+                                    }
+                                    None => panic!(Err::EOF),
+                                    any => panic!(Err::UnexpectedNode(any)),
+                                },
+                                None => panic!(Err::EOF),
+                                any => panic!(Err::UnexpectedNode(any)),
+                            },
+                            any => panic!(Err::VarTypeMismatch(Variable::Array(vec![]), any)),
+                        },
+                        None => panic!(Err::EOF),
+                    },
                     any => {
                         panic!(Err::UnknownKeyword(any.to_string()))
                     }
