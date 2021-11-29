@@ -41,7 +41,6 @@ impl Token {
         match self {
             Str(string) => Variable::Str(string),
             Num(num) => Variable::Num(num),
-            Ident(id) => Variable::Ident(id),
             any => panic!("Tried to convert incorrect data: {:?}", any)
         }
     }

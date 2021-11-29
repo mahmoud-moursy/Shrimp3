@@ -1,7 +1,13 @@
 use std::collections::HashMap;
 use std::io::Write;
 
+use std::io::Read;
+
+use std::fs::File;
+
 use crate::data_types::*;
+
+use crate::panic;
 
 use crate::errors::Err;
 
@@ -66,7 +72,10 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out += num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 }
             }
 
@@ -78,15 +87,21 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             let mut final_out = match args.next() {
                 Some(var) => match var {
                     Variable::Num(num) => num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 },
-                None => panic!("{}", Err::MissingArgs("sub".to_string()))
+                None => panic!(Err::MissingArgs("sub".to_string()))
             };
 
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out -= num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 }
             }
 
@@ -98,15 +113,21 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             let mut final_out = match args.next() {
                 Some(var) => match var {
                     Variable::Num(num) => num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 },
-                None => panic!("{}", Err::MissingArgs("mult".to_string()))
+                None => panic!(Err::MissingArgs("mult".to_string()))
             };
 
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out *= num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 }
             }
 
@@ -118,15 +139,21 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             let mut final_out = match args.next() {
                 Some(var) => match var {
                     Variable::Num(num) => num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 },
-                None => panic!("{}", Err::MissingArgs("div".to_string()))
+                None => panic!(Err::MissingArgs("div".to_string()))
             };
 
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out /= num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 }
             }
 
@@ -138,15 +165,21 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             let mut final_out = match args.next() {
                 Some(var) => match var {
                     Variable::Num(num) => num,
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 },
-                None => panic!("{}", Err::MissingArgs("div".to_string()))
+                None => panic!(Err::MissingArgs("div".to_string()))
             };
 
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out = final_out.powf(num),
-                    any => todo!("{}", any)
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
                 }
             }
 
@@ -172,11 +205,11 @@ pub fn internet(map: &mut HashMap<String, Variable>) {
     insert_fn! {
         "get" => |mut args, _| {
             if args.len() != 1 {
-                panic!("Incorrect argument count")
+                panic!(Err::IncorrectArgCount(1, args.len()))
             }
             let args = match args.remove(0) {
                 Variable::Str(string) => string,
-                any => panic!("Incorrect type: {}", any)
+                any => panic!(Err::VarTypeMismatch(Variable::Str("string".to_string()), any))
             };
             Variable::Str(
                 reqwest::blocking::get(args).unwrap().text().unwrap()
@@ -184,17 +217,23 @@ pub fn internet(map: &mut HashMap<String, Variable>) {
         }
         "post" => |mut args, _| {
             if args.len() != 2 {
-                panic!("Incorrect argument count")
+                panic!(Err::IncorrectArgCount(2, args.len()))
             }
 
             let url = match args.remove(0) {
                 Variable::Str(string) => string,
-                any => panic!("Argument mismatch")
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Str("".to_string()),
+                    any
+                ))
             };
 
             let body = match args.remove(0) {
                 Variable::Str(body) => body,
-                any => panic!("Argument mismatch")
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Str("".to_string()),
+                    any
+                ))
             };
 
             let client = reqwest::blocking::Client::new();
@@ -208,4 +247,36 @@ pub fn internet(map: &mut HashMap<String, Variable>) {
             Variable::Str(res)
         }
     };
+}
+
+/// Provides basic reading and writing I/O operations.
+pub fn fs(map: &mut HashMap<String, Variable>) {
+    macro_rules! insert_fn {
+        (
+				$(
+					$name: expr => $val: expr
+				)*
+			) => {
+            $( map.insert("fs_".to_string() + $name, Variable::NativeFunction($val)); )*
+        };
+    }
+
+    insert_fn! {
+        "read" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(1, args.len()))
+            }
+
+            let mut file = File::open(match args.remove(0) {
+                Variable::Str(string) => string,
+                any => panic!(Err::VarTypeMismatch(Variable::Str("string".to_string()), any))
+            }).unwrap();
+
+            let mut out = String::new();
+
+            file.read_to_string(&mut out).unwrap();
+
+            Variable::Str(out)
+        }
+    }
 }

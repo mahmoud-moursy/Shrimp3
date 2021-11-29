@@ -1,11 +1,11 @@
 use crate::errors::Err;
 use crate::nodes::Node;
+use crate::panic;
 
 use std::collections::HashMap;
 
 #[derive(Clone)]
 pub enum Variable {
-    Ident(String),
     Str(String),
     Num(f32),
     Bool(bool),
@@ -22,7 +22,6 @@ impl std::fmt::Display for Variable {
             f,
             "{}",
             match self {
-                Ident(string) => panic!("{}", Err::UndefinedVar(self.clone())),
                 Str(string) => string.to_string(),
                 Num(num) => num.to_string(),
                 Bool(var) => var.to_string(),
@@ -45,7 +44,14 @@ impl std::fmt::Display for Variable {
                     Node::FunctionDecl { name, args, nodes } => {
                         format!("@{} [{:?}] -> {{ {:?} }}", name, args, nodes)
                     }
-                    any => panic!("SPE: FunctionDecl was in fact {}", any.as_words()),
+                    any => panic!(Err::SPEUnexpectedNode(
+                        Node::FunctionDecl {
+                            name: "".to_string(),
+                            args: vec![],
+                            nodes: vec![]
+                        },
+                        any.clone()
+                    )),
                 },
                 NativeFunction(_) => {
                     String::from("<[Native function representing not supported.]>")
@@ -59,7 +65,6 @@ impl std::fmt::Display for Variable {
 impl std::cmp::PartialEq for Variable {
     fn eq(&self, rhs: &Variable) -> bool {
         return match self {
-            Variable::Ident(x) => panic!("Cannot compare idents"),
             Variable::Array(arr) => {
                 arr == match rhs {
                     Variable::Array(arr) => arr,
@@ -102,10 +107,25 @@ impl std::fmt::Debug for Variable {
             f,
             "{}",
             match self {
-                NativeFunction(func) =>
+                NativeFunction(_) =>
                     String::from("<[Native function representing not supported.]>"),
                 any => any.to_string(),
             }
         )
+    }
+}
+
+impl Variable {
+    pub fn as_words(&self) -> String {
+        match self {
+            Variable::Num(_) => "a number",
+            Variable::Str(_) => "a string",
+            Variable::Array(_) => "an array",
+            Variable::Bool(_) => "a boolean",
+            Variable::Function(_) => "a function",
+            Variable::NativeFunction(_) => "a function",
+            Variable::Void => "nothing",
+        }
+        .to_string()
     }
 }

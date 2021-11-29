@@ -17,7 +17,6 @@ pub enum Node {
     /// Any tokens enclosed in {}.
     /// E.g: { print("Hello world!"); }
     Block(Vec<Node>),
-    NativeFn(fn() -> Variable),
     /// Any call expression
     /// i.e: print("Hello world! 🦐")
     CallExpr {
@@ -47,10 +46,6 @@ impl Node {
             Node::Block(_) => format!("{}", "a codeblock"),
             Node::CallExpr { .. } => format!("{}", "a call expression"),
             Node::FunctionDecl { .. } => format!("{}", "a function declaration"),
-            Node::NativeFn(_) => format!(
-                "{}",
-                "a native function token (This was an internal parser/compiler error)"
-            ),
         }
     }
     pub fn as_var(self) -> Variable {
@@ -72,10 +67,6 @@ impl std::fmt::Display for Node {
             Node::Block(_) => write!(f, "a codeblock"),
             Node::CallExpr { .. } => write!(f, "a call expression"),
             Node::FunctionDecl { .. } => write!(f, "a function declaration"),
-            Node::NativeFn(_) => write!(
-                f,
-                "a native function token (This was an internal parser/compiler error)"
-            ),
         }
     }
 }

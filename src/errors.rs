@@ -1,8 +1,8 @@
 use thiserror::Error;
 
-use crate::data_types::Variable;
 use crate::nodes::Node;
 use crate::tokens::Token;
+use crate::data_types::Variable;
 
 /// Stores all user-made error types
 #[derive(Error, Debug)]
@@ -30,12 +30,30 @@ pub enum Err {
             None => "nothing".to_string()
     })]
     TypeMismatch(Node, Option<Node>),
-    #[error("Undefined variable `{0}`")]
-    UndefinedVar(Variable),
-    #[error("Missing an argument in a function call `{0}`")]
+    #[error("Missing an argument in function call `{0}`")]
     MissingArgs(String),
     #[error("Unknown library specified `{0:?}`")]
     UnknownLib(Node),
+    #[error("Nonexistent variable called `{0}`")]
+    NonexistentVar(String),
+    #[error("Unknown keyword `{0}`")]
+    UnknownKeyword(String),
+    #[error("Variable type mismatch: Expected {}, found {}", .0.as_words(), .1.as_words())] 
+    VarTypeMismatch(Variable, Variable),
+    #[error("SPE: {0} was in fact a {1}")]
+    SPEUnexpectedNode(Node, Node),
+    #[error("Incorrect amount of arguments. Expected {0}, found {1}")]
+    IncorrectArgCount(usize, usize),
     #[error("No defined main function!")]
     NoMain,
+}
+
+#[macro_export]
+macro_rules! panic {
+    ($panic_msg: expr) => {
+        {
+            println!("Error: {}", $panic_msg);
+            std::process::exit(1)
+        }
+    };
 }

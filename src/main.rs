@@ -31,6 +31,7 @@ fn main() -> Result<()> {
         File::open(args.file.unwrap_or(String::from("main.imp")).as_str())
             .expect("Failed to open file. (Does it exist?)"),
     )?;
+
     if args.display_tokens {
         println!("TOKENS:");
         println!("{:?}", tokens);

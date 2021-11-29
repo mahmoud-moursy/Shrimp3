@@ -28,6 +28,20 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
     // Loop until the iterator is done.
     while let Some(code) = char_list.next() {
         match code {
+            '#' => {
+                while let Some(code) = char_list.peek() {
+                    match code {
+                        '#' => {
+                            char_list.next();
+                            break;
+                        }
+                        _ => {
+                            // Move cursor to the next char
+                            char_list.next();
+                        }
+                    }
+                }
+            }
             // Identifier tokens.
             ident if ident.is_alphabetic() => {
                 // Final output

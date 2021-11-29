@@ -34,7 +34,9 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
                             curly_count -= 1;
                             curly_content.push(token);
                         }
-                        any => curly_content.push(any),
+                        any => {
+                            curly_content.push(any);
+                        }
                     };
                     continue;
                 }
@@ -185,7 +187,7 @@ pub fn make_fn_call(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
                     any => panic!("SPE: expected ident, found {}", any),
                 },
                 args: match nodes.next().unwrap() {
-                    Node::Group(arr) => arr,
+                    Node::Group(arr) => make_fn_call(arr)?,
                     any => panic!("SPE: expected group, found {}", any),
                 },
                 assign_to: match nodes.peek() {
