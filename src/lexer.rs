@@ -99,6 +99,11 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
             '[' => final_out.push(Token::OpenSquare),
             ']' => final_out.push(Token::CloseSquare),
             ';' => final_out.push(Token::EndLine),
+            '=' => match char_list.next() {
+                Some('>') => final_out.push(Token::ForAssigner),
+                Some(any) => panic!("{}", Err::UnexpectedChar(line_num, line_pos, any)),
+                None => panic!("{}", Err::EOF),
+            },
             // Handles arrow assigners
             '-' => match char_list.next() {
                 Some(thing) => match thing {

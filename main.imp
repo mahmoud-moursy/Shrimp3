@@ -1,7 +1,6 @@
-@main(x) {
-    use fs
-
-    for [3 4 5 6] -> x {
-        println(x)
-    }
+@main(args) {
+  println("testing testing 123")
+  for range(0 1000) => count {
+    println(count)
+  }
 }

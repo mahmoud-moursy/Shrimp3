@@ -38,6 +38,62 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             println!("Hello world!");
             Variable::Void
         }
+        "pop" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(1, args.len()));
+            }
+
+            return match args.remove(0) {
+                Variable::Array(mut arr) => { arr.pop(); Variable::Array(arr) }
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Array(vec![]),
+                    any
+                ))
+            }
+        }
+        "index" => |mut args, _| {
+            if args.len() != 2 {
+                panic!(Err::IncorrectArgCount(2, args.len()));
+            }
+
+            match args.remove(0) {
+                Variable::Array(mut arr) => arr.remove(
+                    match args.remove(0) {
+                        Variable::Num(num) => num as usize,
+                        any => panic!(Err::VarTypeMismatch(
+                            Variable::Num(0.0),
+                            any
+                        ))
+                    }
+                ),
+                any => panic!(Err::VarTypeMismatch(
+                            Variable::Array(vec![]),
+                            any
+                ))
+            }
+        }
+        "push" => |args, _| {
+            if args.len() < 2 {
+                panic!(Err::MissingArgs("push".to_string()));
+            }
+
+            let mut args = args.into_iter();
+
+            let mut array = match args.next() {
+                Some(Variable::Array(arr)) => arr,
+                Some(any) => panic!(Err::VarTypeMismatch(
+                    Variable::Array(vec![]),
+                    any
+                )),
+                None => panic!(Err::EOF)
+            };
+
+            while let Some(var) = args.next() {
+                array.push(var)
+            }
+
+            Variable::Array(array)
+        }
         "eq" => |args, _| {
             let mut args = args.into_iter();
             let mut last = args.next().unwrap();
@@ -65,6 +121,33 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
 
             Variable::Bool(true)
+        }
+        "range" => |mut args, _| {
+            if args.len() != 2 {
+                panic!(Err::IncorrectArgCount(2, args.len()))
+            }
+
+            let num_1 = match args.remove(0) {
+                Variable::Num(num) => num as i32,
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Num(0.0),
+                    any
+                ))
+            };
+
+            let num_2 = match args.remove(0) {
+                Variable::Num(num) => num as i32,
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Num(0.0),
+                    any
+                ))
+            };
+
+            Variable::Array(
+                (num_1..num_2).collect::<Vec<i32>>().into_iter().map(
+                    |x| Variable::Num(x as f32)
+                ).collect()
+            )
         }
         "print" => |args, _| {
             for i in args {

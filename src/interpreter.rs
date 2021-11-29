@@ -203,7 +203,7 @@ pub fn run(
                     "for" => match func.next() {
                         Some(node) => match into_var(vec![node], variables).remove(0) {
                             Variable::Array(arr) => match func.next() {
-                                Some(Node::Term(Token::ArrowAssigner)) => match func.next() {
+                                Some(Node::Term(Token::ForAssigner)) => match func.next() {
                                     Some(Node::Term(Token::Ident(id))) => {
                                         let block = match func.next() {
                                             Some(Node::Block(block)) => block,
@@ -215,7 +215,7 @@ pub fn run(
                                             variables.insert(id.clone(), var);
                                             run(
                                                 Some(Variable::Function(Node::FunctionDecl {
-                                                    name: "while loop".to_string(),
+                                                    name: "for loop".to_string(),
                                                     args: vec![],
                                                     nodes: block.clone(),
                                                 })),
@@ -233,6 +233,31 @@ pub fn run(
                             },
                             any => panic!(Err::VarTypeMismatch(Variable::Array(vec![]), any)),
                         },
+                        None => panic!(Err::EOF),
+                    },
+                    "while" => match func.next() {
+                        Some(node) => {
+                            let block = match func.next() {
+                                Some(Node::Block(block)) => block,
+                                None => panic!(Err::EOF),
+                                any => panic!(Err::UnexpectedNode(any)),
+                            };
+
+                            while into_var(vec![node.clone()], variables).remove(0)
+                                == Variable::Bool(true)
+                            {
+                                run(
+                                    Some(Variable::Function(Node::FunctionDecl {
+                                        name: "while loop".to_string(),
+                                        args: vec![],
+                                        nodes: block.clone(),
+                                    })),
+                                    variables,
+                                    args.clone(),
+                                    assign_to.clone(),
+                                )?;
+                            }
+                        }
                         None => panic!(Err::EOF),
                     },
                     any => {

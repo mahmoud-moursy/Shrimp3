@@ -31,9 +31,12 @@ pub enum Token {
     OpenSquare,
     /// Square bracket closing `]`
     CloseSquare,
-    /// An arrow declarator `->`
+    /// An arrow assigner `->`
     /// e.g: add(3, 3) -> x
     ArrowAssigner,
+    /// A for assigner `=>`.
+    /// e.g, for range(0 100) => count {}
+    ForAssigner
 }
 
 impl Clone for Token {
@@ -50,7 +53,8 @@ impl Clone for Token {
             CloseBracket => CloseBracket,
             OpenSquare => OpenSquare,
             CloseSquare => CloseSquare,
-            ArrowAssigner => ArrowAssigner
+            ArrowAssigner => ArrowAssigner,
+            ForAssigner => ForAssigner
         }
     }
 }
@@ -79,6 +83,7 @@ impl Token {
             OpenSquare => "a square bracket (`[`)",
             CloseSquare => "a square bracket (`]`)",
             ArrowAssigner => "an arrow assigner (`->`)",
+            ForAssigner => "a for assigner (`=>`)"
         }
         .to_string()
     }
@@ -104,6 +109,8 @@ impl std::fmt::Display for Token {
                     CloseBracket => ")",
                     OpenSquare => "[",
                     CloseSquare => "]",
+                    ForAssigner => "=>",
+                    ArrowAssigner => "->",
                     _ => {
                         "Shrimp parser fmt::display has had an error. :("
                     }
