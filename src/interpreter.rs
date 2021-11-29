@@ -109,15 +109,7 @@ pub fn run(
 
     macro_rules! arr_into_var {
         ($args: expr) => {
-            Variable::Array(
-                $args
-                    .into_iter()
-                    .map(|x| match x {
-                        Node::Term(Token::Ident(var)) => get_var!(var),
-                        any => any.as_var(),
-                    })
-                    .collect(),
-            )
+            Variable::Array(into_var($args, variables))
         };
     }
 
@@ -220,7 +212,7 @@ pub fn run(
             /*  FIXME: This happens with valid code because of a parser
                        error.
             */
-            any => println!("potential runtime err ignored for debugging purposes"),
+            any => panic!(Err::UnexpectedNode(Some(any))),
         }
     }
 

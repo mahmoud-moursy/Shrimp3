@@ -1,7 +1,7 @@
 use crate::data_types::Variable;
 use crate::tokens::Token;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 /// This file is responsible for all nodes in the AST
 pub enum Node {
     /// The most basic Node.
@@ -54,6 +54,15 @@ impl Node {
             Node::Term(Token::Num(num)) => Variable::Num(num),
             Node::Term(Token::Str(string)) => Variable::Str(string),
             any => todo!("cannot turn into variable: {:?}", any),
+        }
+    }
+}
+
+impl Clone for Node {
+    fn clone(&self) -> Self {
+        match self {
+            Node::Term(any) => Node::Term(any.clone()),
+            _ => self.clone(),
         }
     }
 }

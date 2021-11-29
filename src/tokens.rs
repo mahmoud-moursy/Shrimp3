@@ -3,7 +3,7 @@ use std::fmt::Formatter;
 use Token::*;
 use crate::data_types::Variable;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 /// The token enum -- holds all token variants.
 /// - Used in generating the AST.
 pub enum Token {
@@ -34,6 +34,25 @@ pub enum Token {
     /// An arrow declarator `->`
     /// e.g: add(3, 3) -> x
     ArrowAssigner,
+}
+
+impl Clone for Token {
+    fn clone(&self) -> Self {
+        match self {
+            Str(string) => Str(string.clone()),
+            Ident(id) => Ident(id.clone()),
+            Num(num) => Num(*num),
+            FunctionDecl => FunctionDecl,
+            EndLine => EndLine,
+            OpenCurly => OpenCurly,
+            CloseCurly => CloseCurly,
+            OpenBracket => OpenBracket,
+            CloseBracket => CloseBracket,
+            OpenSquare => OpenSquare,
+            CloseSquare => CloseSquare,
+            ArrowAssigner => ArrowAssigner
+        }
+    }
 }
 
 impl Token {

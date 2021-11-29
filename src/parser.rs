@@ -106,7 +106,7 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
             }
 
             Token::OpenSquare => {
-                recurse!(Token::OpenSquare => Token::OpenCurly, Token::CloseSquare, Node::Array);
+                recurse!(Token::OpenSquare => Token::OpenSquare, Token::CloseSquare, Node::Array);
             }
 
             Token::OpenBracket => {
@@ -158,7 +158,7 @@ pub fn make_fn(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
             nodes = Some(arr)
         }
 
-        if name.is_none() || args.is_none() || name.is_none() {
+        if name.is_none() || args.is_none() || nodes.is_none() {
             bail!(Err::UnexpectedToken(Some(Token::FunctionDecl)))
         }
 

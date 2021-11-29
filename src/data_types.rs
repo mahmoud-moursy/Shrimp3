@@ -3,8 +3,6 @@ use crate::nodes::Node;
 use crate::panic;
 
 use std::collections::HashMap;
-
-#[derive(Clone)]
 pub enum Variable {
     Str(String),
     Num(f32),
@@ -59,6 +57,21 @@ impl std::fmt::Display for Variable {
                 Void => String::from("()"),
             }
         )
+    }
+}
+
+impl Clone for Variable {
+    fn clone(&self) -> Self {
+        match self {
+            Variable::Str(string) => Variable::Str(string.clone()),
+            Variable::Num(num) => Variable::Num(*num),
+            Variable::Bool(boolean) => Variable::Bool(*boolean),
+            Variable::Array(array) => Variable::Array(array.clone()),
+            // todo: impl copy for Nodes
+            Variable::Function(func) => Variable::Function(func.clone()),
+            Variable::NativeFunction(func) => Variable::NativeFunction(func.clone()),
+            Variable::Void => Variable::Void,
+        }
     }
 }
 

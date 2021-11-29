@@ -15,12 +15,12 @@ pub enum Err {
     EOF,
     #[error("Unexpected character `{2}` in line {0} at char {1}")]
     UnexpectedChar(usize, usize, char),
-    #[error("Found an unexpected token near {}", match.0 {
+    #[error("Found an unexpected token ({})", match.0 {
             Some(token) => token.to_string(),
             None => "the end of file.".to_string()
         })]
     UnexpectedToken(Option<Token>),
-    #[error("Found an unexpected token near {}", match.0 {
+    #[error("Found an unexpected token ({})", match.0 {
             Some(token) => token.to_string(),
             None => "the end of file.".to_string()
         })]

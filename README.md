@@ -16,10 +16,7 @@ Libraries are here! Check out the [internet library](internet.md)!
 - While loops
 - If statements
 ### FIXMEs:
-
-- Squash parser bugs
 - Fix bug where the rest of the args will not be collected and sent to the program
-- Fix bug where nested functions do not work (`add(3 3 div(4 2))` will not work)
 
 ### Basic syntax
 
