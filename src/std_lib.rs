@@ -57,15 +57,48 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
 
             match args.remove(0) {
-                Variable::Array(mut arr) => arr.remove(
-                    match args.remove(0) {
+                Variable::Array(mut arr) => {
+                    let idx = match args.remove(0) {
                         Variable::Num(num) => num as usize,
                         any => panic!(Err::VarTypeMismatch(
                             Variable::Num(0.0),
                             any
                         ))
+                    };
+
+                    arr.remove(
+                        idx
+                    )
+                },
+                any => panic!(Err::VarTypeMismatch(
+                            Variable::Array(vec![]),
+                            any
+                ))
+            }
+        }
+        "index_v" => |mut args, _| {
+            if args.len() != 2 {
+                panic!(Err::IncorrectArgCount(2, args.len()));
+            }
+
+            match args.remove(0) {
+                Variable::Array(mut arr) => {
+                    let idx = match args.remove(0) {
+                        Variable::Num(num) => num as usize,
+                        any => panic!(Err::VarTypeMismatch(
+                            Variable::Num(0.0),
+                            any
+                        ))
+                    };
+
+                    if args.len() >= args.len() {
+                        return Variable::Void
                     }
-                ),
+
+                    arr.remove(
+                        idx
+                    )
+                },
                 any => panic!(Err::VarTypeMismatch(
                             Variable::Array(vec![]),
                             any
@@ -96,12 +129,11 @@ pub fn construct_lib() -> HashMap<String, Variable> {
         }
         "eq" => |args, _| {
             let mut args = args.into_iter();
-            let mut last = args.next().unwrap();
+            let first = args.next().unwrap();
             while let Some(arg) = args.next() {
-                if arg != last {
+                if arg != first {
                     return Variable::Bool(false)
                 }
-                last = arg;
             }
             Variable::Bool(true)
         }
@@ -250,6 +282,32 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             while let Some(arg) = args.next() {
                 match arg {
                     Variable::Num(num) => final_out /= num,
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
+                }
+            }
+
+            Variable::Num(final_out)
+        }
+        "xor" => |args, _| {
+            let mut args = args.into_iter();
+
+            let mut final_out = match args.next() {
+                Some(var) => match var {
+                    Variable::Num(num) => num,
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
+                },
+                None => panic!(Err::MissingArgs("div".to_string()))
+            };
+
+            while let Some(arg) = args.next() {
+                match arg {
+                    Variable::Num(num) => final_out = (final_out as i32 ^ num as i32) as f32,
                     any => panic!(Err::VarTypeMismatch(
                         Variable::Num(0.0),
                         any

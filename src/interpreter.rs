@@ -142,7 +142,8 @@ pub fn run(
                     "decl" => match func.next() {
                         Some(Node::Term(Token::Ident(var))) => match func.next() {
                             Some(tok) => {
-                                variables.insert(var, tok.as_var());
+                                let res = into_var(vec![tok], variables).remove(0);
+                                variables.insert(var, res);
                             }
                             any => bail!(Err::UnexpectedNode(any)),
                         },

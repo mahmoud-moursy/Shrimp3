@@ -1,5 +1,5 @@
 @main(args) {
-  add(3 3) -> x
-  # Prints out 6 (WOW! SO COOL!) #
-  println(x)
+  println(args)
+  decl y add(3 3)
+  println(y)
 }
