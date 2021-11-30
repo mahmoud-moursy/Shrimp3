@@ -7,6 +7,8 @@ use anyhow::Result;
 use super::errors::Err;
 use super::tokens::Token;
 
+use crate::panic;
+
 // Generate all tokens for the parser to make an AST
 pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
     // Track line position for use in error messages
@@ -101,8 +103,8 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
             ';' => final_out.push(Token::EndLine),
             '=' => match char_list.next() {
                 Some('>') => final_out.push(Token::ForAssigner),
-                Some(any) => panic!("{}", Err::UnexpectedChar(line_num, line_pos, any)),
-                None => panic!("{}", Err::EOF),
+                Some(any) => panic!(Err::UnexpectedChar(line_num, line_pos, any)),
+                None => panic!(Err::EOF),
             },
             // Handles arrow assigners
             '-' => match char_list.next() {

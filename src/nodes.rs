@@ -1,5 +1,7 @@
 use crate::data_types::Variable;
 use crate::tokens::Token;
+use crate::errors::Err;
+use crate::panic;
 
 #[derive(Debug, PartialEq)]
 /// This file is responsible for all nodes in the AST
@@ -53,7 +55,7 @@ impl Node {
             Node::Array(arr) => Variable::Array(arr.into_iter().map(|x| x.as_var()).collect()),
             Node::Term(Token::Num(num)) => Variable::Num(num),
             Node::Term(Token::Str(string)) => Variable::Str(string),
-            any => todo!("cannot turn into variable: {:?}", any),
+            any => panic!(Err::UnexpectedNode(Some(any))),
         }
     }
 }

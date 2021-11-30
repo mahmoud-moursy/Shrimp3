@@ -4,12 +4,12 @@ A complete rework of ShrimpLang 2. This release is focused on speed, an improved
 
 Oh, and also, `$` to access variables is being removed! (Yay!)
 
-### Docs
+### Docs-ish (they are not good.)
 
-Libraries are here! Check out the [internet library](internet.md)!
+##### - Libraries are here! Check out the [internet library](internet.md)!
 
 ### TODOs:
-... TBD
+- Grow Shrimp!
 ### FIXMEs:
 - Fix bug where the rest of the args will not be collected and sent to the program (low priority)
 
@@ -17,7 +17,7 @@ Libraries are here! Check out the [internet library](internet.md)!
 
 `;` is no longer required for a new line.
 
-Comments must be enclosed in `#`, e.g `# A comment`
+Comments must be enclosed in `#`, e.g `# A comment #`
 
 A new syntax feature has been added, the arrow assigner (`->`).
 It lets you assign the output of a function to a variable.
@@ -34,6 +34,13 @@ Some other minor changes have been made, here is a taste of the syntax
 @main(args) {
 	# Prints arguments given to the program #
 	println(args)
+}
+```
+
+```
+@main(args) {
+	# The below code works too! #
+	println(args) println(args)
 }
 ```
 
@@ -81,7 +88,7 @@ but if x = 2
 `eq(` `cmp(x 1 2 2 3)` `false` `)`
 
 #### `range(Number Number) -> Array`
-Equivalent to the Rust `x..y`.
+An exclusive range function..
 `range(0 3)` -> `[ 0 1 2 ]`
 
 #### `add(Number*)`
@@ -101,3 +108,85 @@ Raises the first number to the power of all values provided.
 
 #### `xor(Number(1+))`
 Applies a XOR gate to the number using all of the provided values.
+
+### Keywords
+
+#### `decl`
+```
+@main(args) {
+	decl x "Hello world"
+	println(x)
+}
+```
+
+#### `if`
+```
+@main(args) {
+	if true {
+		println("This should always execute")
+	}
+	if eq(1 1) {
+		println("This should also always execute")
+	}
+	if false {
+		println("This should never execute")
+	}
+}
+```
+
+#### `for`
+```
+@main(args) {
+	range(0 1000) -> my_range
+	for my_range => num {
+		# Prints the current value on each iteration #
+		# There are 1000 iterations because there are 1000 values #
+		println(num)
+	}
+}
+```
+
+#### `while`
+```
+@main(args) {
+	while true {
+		# Self explanatory. #
+		println("Infinite loop!")
+	}
+}
+```
+
+#### `return`
+```
+@main(args) {
+	my_function() -> x
+	# Prints "Hello there!" #
+	println(x)
+}
+
+@my_function() {
+	return "Hello there!"
+}
+```
+
+#### `del`
+```
+@main(args) {
+	decl x "Hi"
+	del x
+	# This will error out because
+	# `x` has been deleted.
+	println(x)
+}
+```
+
+#### `use`
+```
+@main(args) {
+	# Imports the (built-in) internet library #
+	use internet
+	internet_get("https://sh.rustup.rs") -> rustup_script
+	# Prints the shell script for Rustup's installer #
+	println(rustup_script)
+}
+```

@@ -3,6 +3,10 @@ use std::fmt::Formatter;
 use Token::*;
 use crate::data_types::Variable;
 
+use crate::errors::Err;
+
+use crate::panic;
+
 #[derive(Debug, PartialEq)]
 /// The token enum -- holds all token variants.
 /// - Used in generating the AST.
@@ -64,7 +68,7 @@ impl Token {
         match self {
             Str(string) => Variable::Str(string),
             Num(num) => Variable::Num(num),
-            any => panic!("Tried to convert incorrect data: {:?}", any)
+            any => panic!(Err::UnexpectedToken(Some(any)))
         }
     }
     pub fn as_words(&self) -> String {

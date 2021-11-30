@@ -1,5 +1,4 @@
 @main(args) {
-  println(args)
-  decl y add(3 3)
-  println(y)
+	# The below code works too! #
+	println(args) println(args)
 }

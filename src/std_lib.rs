@@ -343,6 +343,35 @@ pub fn construct_lib() -> HashMap<String, Variable> {
 
             Variable::Num(final_out)
         }
+        "not" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(1, args.len()))
+            }
+
+            match args.remove(0) {
+                Variable::Bool(boolean) => Variable::Bool(!boolean),
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Bool(true),
+                    any
+                ))
+            }
+        }
+        "weak_eq" => |args, _| {
+            if args.len() < 2 {
+                panic!(Err::MissingArgs("weak_eq".to_string()))
+            }
+            let mut args = args.into_iter();
+
+            let first = args.next().unwrap();
+
+            while let Some(arg) = args.next() {
+                if arg.to_string() != first.to_string() {
+                    return Variable::Bool(false)
+                }
+            }
+
+            Variable::Bool(true)
+        }
     );
 
     map
@@ -435,6 +464,28 @@ pub fn fs(map: &mut HashMap<String, Variable>) {
             file.read_to_string(&mut out).unwrap();
 
             Variable::Str(out)
+        }
+        "write" => |mut args, _| {
+            if args.len() != 2 {
+                panic!(Err::IncorrectArgCount(1, args.len()))
+            }
+
+            let mut file = File::open(match args.remove(0) {
+                Variable::Str(string) => string,
+                any => panic!(Err::VarTypeMismatch(Variable::Str("string".to_string()), any))
+            }).unwrap();
+
+            let out = match args.remove(0) {
+                Variable::Str(string) => {
+                    let out = string.into_bytes();
+                    out
+                },
+                any => panic!(Err::VarTypeMismatch(Variable::Str("string".to_string()), any))
+            };
+
+            file.write(&out).unwrap();
+
+            Variable::Void
         }
     }
 }

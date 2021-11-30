@@ -6,6 +6,8 @@ use crate::errors::Err;
 use crate::nodes::Node;
 use crate::tokens::Token;
 
+use crate::panic;
+
 pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
     // Convert tokens -> terms.
     let mut tokens = tokens.into_iter();
@@ -184,11 +186,14 @@ pub fn make_fn_call(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
             final_out.push(Node::CallExpr {
                 name: match node {
                     Node::Term(Token::Ident(ident)) => ident,
-                    any => panic!("SPE: expected ident, found {}", any),
+                    any => panic!(Err::SPEUnexpectedNode(
+                        Node::Term(Token::Ident("id".to_string())),
+                        any
+                    )),
                 },
                 args: match nodes.next().unwrap() {
                     Node::Group(arr) => make_fn_call(arr)?,
-                    any => panic!("SPE: expected group, found {}", any),
+                    any => panic!(Err::SPEUnexpectedNode(Node::Group(vec![]), any)),
                 },
                 assign_to: match nodes.peek() {
                     Some(Node::Term(Token::ArrowAssigner)) => {

@@ -1,6 +1,7 @@
 use crate::data_types::*;
 use crate::errors::Err;
 use crate::nodes::Node;
+
 use crate::panic;
 
 use crate::std_lib::{self, construct_lib};
@@ -148,6 +149,13 @@ pub fn run(
                             any => bail!(Err::UnexpectedNode(any)),
                         },
                         any => bail!(Err::UnexpectedNode(any)),
+                    },
+                    "del" => match func.next() {
+                        Some(Node::Term(Token::Ident(id))) => {
+                            variables.remove(&id);
+                        }
+                        None => panic!(Err::EOF),
+                        any => panic!(Err::UnexpectedNode(any)),
                     },
                     "return" => match func.next() {
                         Some(Node::Term(tok)) => match tok {

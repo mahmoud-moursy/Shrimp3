@@ -3,6 +3,7 @@ use crate::nodes::Node;
 use crate::panic;
 
 use std::collections::HashMap;
+
 pub enum Variable {
     Str(String),
     Num(f32),
@@ -60,6 +61,7 @@ impl std::fmt::Display for Variable {
     }
 }
 
+// Micro-optimization.
 impl Clone for Variable {
     fn clone(&self) -> Self {
         match self {
