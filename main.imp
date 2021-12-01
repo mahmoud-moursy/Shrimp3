@@ -1,7 +1,9 @@
 @main(args) {
-  secondary(1 2 3)
-}
-
-@secondary(id id id) {
-  println(id)
+  bytes("Hello world!") -> char_arr
+  decl new []
+  for char_arr => x {
+    push(new add(x 0.1)) -> new
+  }
+  del char_arr
+  println(new)
 }

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::io::Write;
 
+use std::convert::TryInto;
+
 use std::io::Read;
 
 use std::fs::File;
@@ -402,6 +404,50 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
 
             Variable::Bool(true)
+        }
+        "chars" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(
+                    1,
+                    args.len()
+                ))
+            }
+
+            Variable::Array(
+                match args.remove(0) {
+                    Variable::Str(string) => string.chars().map(|x| Variable::Str(String::from(x))).collect(),
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Str("".to_string()),
+                        any
+                    ))
+                }
+            )
+        }
+        "bytes" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(
+                    1,
+                    args.len()
+                ))
+            }
+
+            Variable::Array(
+                match args.remove(0) {
+                    Variable::Str(string) => string.bytes().map(|x| Variable::Num(
+                        {
+
+                            match u8::try_into(x) {
+                                Ok(res) => res,
+                                Err(err) => panic!(err)
+                            }
+                        }
+                    )).collect(),
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Str("".to_string()),
+                        any
+                    ))
+                }
+            )
         }
         "exit" => |args, _| {
             std::process::exit(

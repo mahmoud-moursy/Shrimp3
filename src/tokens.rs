@@ -40,7 +40,7 @@ pub enum Token {
     ArrowAssigner,
     /// A for assigner `=>`.
     /// e.g, for range(0 100) => count {}
-    ForAssigner
+    ForAssigner,
 }
 
 impl Clone for Token {

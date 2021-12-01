@@ -351,9 +351,11 @@ pub fn into_var(args: Vec<Node>, variables: &mut HashMap<String, Variable>) -> V
                 assign_to,
             } => {
                 let res = into_var(args, variables);
-                run(Some(get_var!(name)), variables, res, assign_to)
+                match run(Some(get_var!(name)), variables, res, assign_to) {
+                    Ok(res) => res,
+                    Err(err) => panic!(err),
+                }
             }
-            .unwrap(),
             any => any.as_var(),
         })
         .collect()
