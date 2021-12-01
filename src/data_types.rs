@@ -4,6 +4,8 @@ use crate::panic;
 
 use std::collections::HashMap;
 
+use rayon::prelude::*;
+
 pub enum Variable {
     Str(String),
     Num(f32),
@@ -32,7 +34,7 @@ impl std::fmt::Display for Variable {
                         // Pushes the std::fmt::Display impl
                         // of the inner variable enum to the
                         // string
-                        out.extend(i.to_string().chars());
+                        out.par_extend(i.to_string().par_chars());
 
                         out.push(' ');
                     }

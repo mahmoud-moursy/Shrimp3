@@ -13,6 +13,8 @@ use crate::panic;
 
 use crate::errors::Err;
 
+use rayon::prelude::*;
+
 pub fn construct_lib() -> HashMap<String, Variable> {
     let mut map = HashMap::new();
 
@@ -107,6 +109,71 @@ pub fn construct_lib() -> HashMap<String, Variable> {
                 ))
             }
         }
+        "replace" => |mut args, _| {
+            if args.len() != 3 {
+                panic!(
+                    Err::IncorrectArgCount(
+                        3,
+                        args.len()
+                    )
+                )
+            }
+
+            let mut array = match args.remove(0) {
+                Variable::Array(arr) => arr,
+                any => panic!(
+                    Err::VarTypeMismatch(
+                        Variable::Array(vec![]),
+                        any
+                    )
+                )
+            };
+
+            let index = match args.remove(0) {
+                Variable::Num(num) => num as usize,
+                any => panic!(
+                    Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    )
+                )
+            };
+
+            let elem = args.remove(0);
+
+            *match array.get_mut(index) {
+                Some(arr) => arr,
+                None => panic!(Err::OutOfBoundsIndex)
+            } = elem;
+
+            Variable::Array(array)
+        }
+        "enumerate" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(
+                    1,
+                    args.len()
+                ))
+            }
+
+            let array = match args.remove(0) {
+                Variable::Array(array) => array,
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Array(vec![]),
+                    any
+                ))
+            };
+
+            let array = array.into_par_iter().enumerate().map(
+                |x| {
+                    Variable::Array(vec![Variable::Num(x.0 as f32), x.1])
+                }
+            );
+
+            Variable::Array(
+                array.collect()
+            )
+        }
         "push" => |args, _| {
             if args.len() < 2 {
                 panic!(Err::MissingArgs("push".to_string()));
@@ -178,7 +245,7 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             };
 
             Variable::Array(
-                (num_1..num_2).collect::<Vec<i32>>().into_iter().map(
+                (num_1..num_2).into_par_iter().map(
                     |x| Variable::Num(x as f32)
                 ).collect()
             )
@@ -379,9 +446,9 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
 
             Variable::Num(match args.remove(0) {
-                Variable::Str(string) => match string.parse() {
+                Variable::Str(string) => match string.trim().parse() {
                     Ok(res) => res,
-                    Err(_) => panic!(Err::NumParserError(Variable::Num(0.0)))
+                    Err(_) => panic!(Err::NumParserError(Variable::Str(string)))
                 },
                 any => panic!(Err::VarTypeMismatch(
                     Variable::Str("".to_string()),
@@ -415,7 +482,7 @@ pub fn construct_lib() -> HashMap<String, Variable> {
 
             Variable::Array(
                 match args.remove(0) {
-                    Variable::Str(string) => string.chars().map(|x| Variable::Str(String::from(x))).collect(),
+                    Variable::Str(string) => string.par_chars().map(|x| Variable::Str(String::from(x))).collect(),
                     any => panic!(Err::VarTypeMismatch(
                         Variable::Str("".to_string()),
                         any
@@ -433,7 +500,7 @@ pub fn construct_lib() -> HashMap<String, Variable> {
 
             Variable::Array(
                 match args.remove(0) {
-                    Variable::Str(string) => string.bytes().map(|x| Variable::Num(
+                    Variable::Str(string) => string.par_bytes().map(|x| Variable::Num(
                         {
 
                             match u8::try_into(x) {
@@ -456,6 +523,40 @@ pub fn construct_lib() -> HashMap<String, Variable> {
                     _ => 1
                 }
             )
+        }
+        "split" => |args, _| {
+            if args.len() != 2 {
+                panic!(
+                    Err::IncorrectArgCount(
+                        2,
+                        args.len()
+                    )
+                )
+            }
+
+            let to_split = match args.get(0).unwrap() {
+                Variable::Str(string) => string,
+                any => panic!(
+                    Err::VarTypeMismatch(
+                        Variable::Str("".to_string()),
+                        any.clone()
+                    )
+                )
+            };
+
+            let splitter = match args.get(1).unwrap() {
+                Variable::Str(string) => string,
+                any => panic!(
+                    Err::VarTypeMismatch(
+                        Variable::Str("".to_string()),
+                        any.clone()
+                    )
+                )
+            };
+
+            Variable::Array(to_split.split(splitter).map(
+                |x| Variable::Str(x.to_string())
+            ).collect())
         }
     );
 
@@ -522,14 +623,14 @@ pub fn internet(map: &mut HashMap<String, Variable>) {
 }
 
 /// Provides basic reading and writing I/O operations.
-pub fn fs(map: &mut HashMap<String, Variable>) {
+pub fn io(map: &mut HashMap<String, Variable>) {
     macro_rules! insert_fn {
         (
 				$(
 					$name: expr => $val: expr
 				)*
 			) => {
-            $( map.insert("fs_".to_string() + $name, Variable::NativeFunction($val)); )*
+            $( map.insert("io_".to_string() + $name, Variable::NativeFunction($val)); )*
         };
     }
 
@@ -569,6 +670,21 @@ pub fn fs(map: &mut HashMap<String, Variable>) {
             };
 
             file.write(&out).unwrap();
+
+            Variable::Void
+        }
+        "input" => |args, _| {
+            if let Some(arg) = args.get(0) {
+                print!("{}", arg.to_string());
+                std::io::stdout().flush().unwrap();
+            }
+
+            let mut out = String::new();
+
+            match std::io::stdin().read_line(&mut out) {
+                Ok(_) => return Variable::Str(out.trim_end().to_string()),
+                Err(_) => {}
+            };
 
             Variable::Void
         }

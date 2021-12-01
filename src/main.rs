@@ -23,7 +23,8 @@ struct Cli {
     display_tokens: bool,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let args = Cli::parse();
 
     // TODO: Use tokens in meaningful way.

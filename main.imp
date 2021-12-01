@@ -1,9 +1,3 @@
 @main(args) {
-  bytes("Hello world!") -> char_arr
-  decl new []
-  for char_arr => x {
-    push(new add(x 0.1)) -> new
-  }
-  del char_arr
-  println(new)
+  println(enumerate(range(0 10)))
 }

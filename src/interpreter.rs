@@ -169,7 +169,7 @@ pub fn run(
                     "use" => match func.next() {
                         Some(node) => match node {
                             Node::Term(Token::Ident(lib)) => match lib.as_str() {
-                                "fs" => std_lib::fs(variables),
+                                "io" => std_lib::io(variables),
                                 "internet" => std_lib::internet(variables),
                                 any => {
                                     bail!(Err::UnknownLib(Node::Term(Token::Ident(

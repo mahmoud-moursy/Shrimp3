@@ -47,7 +47,9 @@ pub enum Err {
     #[error("No defined main function!")]
     NoMain,
     #[error("There was in error in converting {} into a number (num function called)", .0.as_words())]
-    NumParserError(Variable)
+    NumParserError(Variable),
+    #[error("Index out of bounds!")]
+    OutOfBoundsIndex
 }
 
 #[macro_export]
