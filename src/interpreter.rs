@@ -93,7 +93,8 @@ pub fn run(
     };
 
     if args.len() != func.1.len() {
-        panic!(Err::IncorrectArgCount(func.1.len(), args.len()))
+        println!("(Error originated in call to {} function)", func.0);
+        panic!(Err::IncorrectArgCount(args.len(), func.1.len()))
     }
 
     let mut temp_vars = vec![];

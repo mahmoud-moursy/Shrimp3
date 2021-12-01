@@ -109,6 +109,14 @@ Raises the first number to the power of all values provided.
 #### `xor(Number(1+))`
 Applies a XOR gate to the number using all of the provided values.
 
+#### `not(Bool)`
+Inverts a boolean.
+
+#### `str({value})`
+Converts a value into a string.
+
+
+
 ### Keywords
 
 #### `decl`

@@ -356,6 +356,37 @@ pub fn construct_lib() -> HashMap<String, Variable> {
                 ))
             }
         }
+        "str" => |args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(
+                    1,
+                    args.len()
+                ))
+            }
+
+            Variable::Str(
+                args[0].to_string()
+            )
+        }
+        "num" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(
+                    1,
+                    args.len()
+                ))
+            }
+
+            Variable::Num(match args.remove(0) {
+                Variable::Str(string) => match string.parse() {
+                    Ok(res) => res,
+                    Err(_) => panic!(Err::NumParserError(Variable::Num(0.0)))
+                },
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Str("".to_string()),
+                    any
+                ))
+            })
+        }
         "weak_eq" => |args, _| {
             if args.len() < 2 {
                 panic!(Err::MissingArgs("weak_eq".to_string()))
@@ -371,6 +402,14 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             }
 
             Variable::Bool(true)
+        }
+        "exit" => |args, _| {
+            std::process::exit(
+                match &args[0] {
+                    Variable::Num(number) => *number as i32,
+                    _ => 1
+                }
+            )
         }
     );
 

@@ -1,4 +1,7 @@
 @main(args) {
-	# The below code works too! #
-	println(args) println(args)
+  secondary(1 2 3)
+}
+
+@secondary(id id id) {
+  println(id)
 }
