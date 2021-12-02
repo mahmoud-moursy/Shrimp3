@@ -1,3 +1,9 @@
 @main(args) {
-  println(enumerate(range(0 10)))
+  println(
+    enumerate(
+      range(
+        0 100
+      )
+    )
+  )
 }
