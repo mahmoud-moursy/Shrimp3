@@ -6,6 +6,10 @@ Oh, and also, `$` to access variables is being removed! (Yay!)
 
 ### Docs-ish (they are not good.)
 
+#### Why the docs need improvement.
+
+They show mechanically **how** you do something, but never **why** you would do it, and they provide no in-depth explanation or walk-throughs. This is especially critical due to the language's unconventional syntax. That being said, I do not have the energy to create complete and satisfying documentation for ShrimpLang, so this will have to do.
+
 ##### - Libraries are here! Check out the [internet library](internet.md)!
 
 ### TODOs:

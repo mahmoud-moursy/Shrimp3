@@ -1,9 +1,6 @@
 @main(args) {
-  println(
-    enumerate(
-      range(
-        0 100
-      )
-    )
-  )
+  use web
+
+  el_p("Hello world!") -> page
+  println(page)
 }

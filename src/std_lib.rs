@@ -690,3 +690,50 @@ pub fn io(map: &mut HashMap<String, Variable>) {
         }
     }
 }
+
+pub fn html(map: &mut HashMap<String, Variable>) {
+    macro_rules! insert_elem {
+        (
+				$(
+					$name: expr => $val: expr
+				)*
+			) => {
+            $( map.insert("el_".to_string() + $name, Variable::NativeFunction($val)); )*
+        };
+    }
+
+    macro_rules! elem {
+        ($($tag: expr),*) => {
+            insert_elem! {
+                    $($tag => |mut args, _| {
+                    if args.len() == 1 {
+                        args.push(
+                            Variable::Str("".to_string())
+                        )
+                    }
+
+                 if args.len() != 2 {
+                    panic!(
+                        Err::MissingArgs("_p".to_string())
+                    )
+                }
+
+                let mut args = args.into_iter();
+
+                Variable::Str(format!(
+                    "<{} {}> {} </{} >",
+                    $tag,
+                    args.next_back().unwrap(),
+                    args.next().unwrap(),
+                    $tag
+                ))
+            })*
+                }
+        };
+    }
+
+    elem!(
+        "p", "tag", "head", "title", "meta", "h1", "h2", "h3", "h4", "h5", "h6", "div", "span",
+        "header", "code", "samp", "pre", "link", "a", "img", "script"
+    );
+}
