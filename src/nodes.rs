@@ -43,9 +43,12 @@ impl Node {
     pub fn as_words(&self) -> String {
         match self {
             Node::Term(tok) => format!("{}", tok.as_words()),
-            Node::Array(_) => format!("{}", "an array"),
-            Node::Group(_) => format!("{}", "a group"),
-            Node::Block(_) => format!("{}", "a codeblock"),
+            Node::Array(_) => "an array".to_string(),
+            Node::Group(_) => "a group".to_string(),
+            // Don't know what i was thinking when i wrote this,
+            // but i'm too lazy to change the rest into
+            // "a codeblock".into_string()
+            Node::Block(_) => "a codeblock".to_string(),
             Node::CallExpr { .. } => format!("{}", "a call expression"),
             Node::FunctionDecl { .. } => format!("{}", "a function declaration"),
         }
@@ -95,7 +98,7 @@ impl std::fmt::Display for Node {
         match self {
             Node::Term(tok) => write!(f, "{}", tok.as_words()),
             Node::Array(_) => write!(f, "an array"),
-            Node::Group(_) => write!(f, "a group"),
+            Node::Group(gr) => write!(f, "a group of {:?}", gr),
             Node::Block(_) => write!(f, "a codeblock"),
             Node::CallExpr { .. } => write!(f, "a call expression"),
             Node::FunctionDecl { .. } => write!(f, "a function declaration"),

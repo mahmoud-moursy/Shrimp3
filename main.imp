@@ -1,6 +1,7 @@
 @main(args) {
-  use web
+  use internet
 
-  el_p("Hello world!") -> page
-  println(page)
+  for range(0 999) => x {
+    println(x)
+  }
 }

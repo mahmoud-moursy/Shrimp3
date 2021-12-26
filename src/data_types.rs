@@ -33,7 +33,7 @@ impl std::fmt::Display for Variable {
                         // Kinda jank.
                         // Pushes the std::fmt::Display impl
                         // of the inner variable enum to the
-                        // string
+                        // string.
                         out.par_extend(i.to_string().par_chars());
 
                         out.push(' ');
@@ -136,8 +136,7 @@ impl std::fmt::Debug for Variable {
             f,
             "{}",
             match self {
-                NativeFunction(_) =>
-                    String::from("<[Native function representing not supported.]>"),
+                NativeFunction(_) => String::from("<[Native function]>"),
                 any => any.to_string(),
             }
         )

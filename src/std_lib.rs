@@ -308,6 +308,32 @@ pub fn construct_lib() -> HashMap<String, Variable> {
 
             Variable::Num(final_out)
         }
+        "mod" => |args, _| {
+            let mut args = args.into_iter();
+
+            let mut final_out = match args.next() {
+                Some(var) => match var {
+                    Variable::Num(num) => num,
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
+                },
+                None => panic!(Err::MissingArgs("sub".to_string()))
+            };
+
+            while let Some(arg) = args.next() {
+                match arg {
+                    Variable::Num(num) => final_out %= num,
+                    any => panic!(Err::VarTypeMismatch(
+                        Variable::Num(0.0),
+                        any
+                    ))
+                }
+            }
+
+            Variable::Num(final_out)
+        }
         "mult" => |args, _| {
             let mut args = args.into_iter();
 

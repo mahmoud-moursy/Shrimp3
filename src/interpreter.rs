@@ -183,68 +183,88 @@ pub fn run(
                         None => bail!(Err::EOF),
                     },
                     "if" => match func.next() {
-                        Some(thing) => match into_var(vec![thing], variables).remove(0) {
-                            Variable::Bool(boolean) => {
-                                if boolean {
-                                    run(
-                                        Some(Variable::Function(Node::FunctionDecl {
-                                            name: "if statement".to_string(),
-                                            args: vec![],
-                                            nodes: match func.next() {
-                                                Some(Node::Block(arr)) => arr,
-                                                any => panic!(Err::UnexpectedNode(any)),
-                                            },
-                                        })),
-                                        variables,
-                                        args.clone(),
-                                        assign_to.clone(),
-                                    )?;
-                                } else {
-                                    // Ensure that syntax is proper even
-                                    // if the statement was false.
-                                    match func.next() {
-                                        Some(Node::Block(_)) => {}
-                                        any => panic!(Err::UnexpectedNode(any)),
+                        Some(thing) => {
+                            match into_var(vec![thing], variables).remove(0) {
+                                Variable::Bool(boolean) => {
+                                    if boolean {
+                                        run(
+                                            Some(Variable::Function(Node::FunctionDecl {
+                                                name: "if statement".to_string(),
+                                                args: vec![],
+                                                nodes: match func.next() {
+                                                    Some(Node::Block(arr)) => arr,
+                                                    // FIXME: Hacky workaround for
+                                                    // nested loops/ifs
+                                                    Some(Node::Group(arr)) => arr,
+                                                    any => {
+                                                        panic!(Err::UnexpectedNode(any))
+                                                    }
+                                                },
+                                            })),
+                                            variables,
+                                            args.clone(),
+                                            assign_to.clone(),
+                                        )?;
+                                    } else {
+                                        // Ensure that syntax is proper even
+                                        // if the statement was false.
+                                        match func.next() {
+                                            // FIXME: Hacky workaround for elusive bug.
+                                            // It matches `Block`s as `Group`s for some reason,
+                                            // despite the variable being a Group when println'd
+                                            // as well as debugged. Not sure what is happening! :(
+                                            Some(Node::Group(_)) => {}
+                                            // Proper syntax/happy path
+                                            Some(Node::Block(_)) => {}
+                                            any => panic!(Err::UnexpectedNode(any)),
+                                        }
                                     }
                                 }
+                                any => panic!(Err::VarTypeMismatch(Variable::Bool(true), any)),
                             }
-                            any => panic!(Err::VarTypeMismatch(Variable::Bool(true), any)),
-                        },
+                        }
                         None => panic!(Err::EOF),
                     },
                     "for" => match func.next() {
-                        Some(node) => match into_var(vec![node], variables).remove(0) {
-                            Variable::Array(arr) => match func.next() {
-                                Some(Node::Term(Token::ForAssigner)) => match func.next() {
-                                    Some(Node::Term(Token::Ident(id))) => {
-                                        let block = match func.next() {
-                                            Some(Node::Block(block)) => block,
-                                            None => panic!(Err::EOF),
-                                            any => panic!(Err::UnexpectedNode(any)),
-                                        };
+                        Some(node) => {
+                            match into_var(vec![node], variables).remove(0) {
+                                Variable::Array(arr) => match func.next() {
+                                    Some(Node::Term(Token::ForAssigner)) => match func.next() {
+                                        Some(Node::Term(Token::Ident(id))) => {
+                                            let block = match func.next() {
+                                                Some(Node::Block(block)) => block,
+                                                // FIXME: Hacky workaround for nested
+                                                // loops.
+                                                Some(Node::Group(block)) => block,
+                                                None => panic!(Err::EOF),
+                                                any => panic!(Err::UnexpectedNode(any)),
+                                            };
 
-                                        for var in arr {
-                                            variables.insert(id.clone(), var);
-                                            run(
-                                                Some(Variable::Function(Node::FunctionDecl {
-                                                    name: "for loop".to_string(),
-                                                    args: vec![],
-                                                    nodes: block.clone(),
-                                                })),
-                                                variables,
-                                                args.clone(),
-                                                assign_to.clone(),
-                                            )?;
+                                            for var in arr {
+                                                variables.insert(id.clone(), var);
+                                                run(
+                                                    Some(Variable::Function(Node::FunctionDecl {
+                                                        name: "for loop".to_string(),
+                                                        args: vec![],
+                                                        nodes: block.clone(),
+                                                    })),
+                                                    variables,
+                                                    args.clone(),
+                                                    assign_to.clone(),
+                                                )?;
+                                            }
                                         }
-                                    }
+                                        None => panic!(Err::EOF),
+                                        any => {
+                                            panic!(Err::UnexpectedNode(any))
+                                        }
+                                    },
                                     None => panic!(Err::EOF),
-                                    any => panic!(Err::UnexpectedNode(any)),
+                                    any => panic!(Err::TypeMismatch(Node::Array(vec![]), any)),
                                 },
-                                None => panic!(Err::EOF),
-                                any => panic!(Err::UnexpectedNode(any)),
-                            },
-                            any => panic!(Err::VarTypeMismatch(Variable::Array(vec![]), any)),
-                        },
+                                any => panic!(Err::VarTypeMismatch(Variable::Array(vec![]), any)),
+                            }
+                        }
                         None => panic!(Err::EOF),
                     },
                     "while" => match func.next() {
