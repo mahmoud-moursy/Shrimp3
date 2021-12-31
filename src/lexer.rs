@@ -22,7 +22,8 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
     // Iterator to go through all chars.
     let mut char_list = chars.chars().into_iter().peekable();
 
-    // Free memory.
+    // Free memory, drops file handle because it will
+    // never be used again. May be useful for Windows users?
     drop(file);
 
     let mut final_out = vec![];
@@ -36,6 +37,12 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
                         '#' => {
                             char_list.next();
                             break;
+                        }
+                        '\\' => {
+                            // Skip current char.
+                            char_list.next();
+                            // Skips a potential #.
+                            char_list.next();
                         }
                         _ => {
                             // Move cursor to the next char
@@ -141,14 +148,16 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
                 None => bail!(Err::UnexpectedEOF(line_num, line_pos)),
             },
             // Handles strings
-            '"' => {
+            '"' | '\'' => {
+                let quote = code;
+
                 // Final output
                 let mut out = String::new();
 
                 // If the file isn't over, add current char
                 while let Some(thing) = char_list.next() {
                     // Stop if the apostrophe opened with
-                    if thing == '"' {
+                    if thing == quote {
                         break;
                     }
                     out.push(
@@ -169,7 +178,7 @@ pub fn make_tokens(mut file: File) -> Result<Vec<Token>> {
                                 Some(thing) => match thing {
                                     '\n' => continue,
                                     'n' => '\n',
-                                    'u' => '\x00',
+                                    '0' => '\x00',
                                     other => other,
                                 },
                                 None => bail!(Err::UnexpectedEOF(line_num, line_pos)),

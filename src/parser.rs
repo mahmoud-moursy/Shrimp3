@@ -118,6 +118,7 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
             Token::Str(_) | Token::Num(_) | Token::Ident(_) => {
                 final_out.push(Node::Term(token));
             }
+
             any => final_out.push(Node::Term(any)),
         }
     }
@@ -140,10 +141,12 @@ pub fn make_fn(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
         if node != Node::Term(Token::FunctionDecl) {
             continue;
         }
+
         // Better way to do this?
         if let Some(Node::Term(Token::Ident(fn_name))) = node_list.next() {
             name = Some(fn_name)
         }
+
         if let Some(Node::Group(arr)) = node_list.next() {
             for i in &arr {
                 if let Node::Term(Token::Ident(_)) = i {

@@ -1,5 +1,7 @@
 ## Internet library
 
+Eventually, a way to create a server will be added, but that is not yet implemented.
+
 How to import:
 
 ```

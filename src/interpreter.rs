@@ -171,7 +171,7 @@ pub fn run(
                             Node::Term(Token::Ident(lib)) => match lib.as_str() {
                                 "io" => std_lib::io(variables),
                                 "internet" => std_lib::internet(variables),
-                                "web" => std_lib::html(variables),
+                                "html" => std_lib::html(variables),
                                 any => {
                                     bail!(Err::UnknownLib(Node::Term(Token::Ident(
                                         any.to_string()

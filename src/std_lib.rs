@@ -265,6 +265,20 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             std::io::stdout().flush().unwrap();
             Variable::Void
         }
+        "con" => |args, _| {
+            let mut args = args.into_iter();
+
+            let mut out = match args.next() {
+                Some(any) => any.to_string(),
+                None => panic!(Err::MissingArgs("con".to_string()))
+            };
+
+            while let Some(var) = args.next() {
+                out += &var.to_string()
+            }
+
+            Variable::Str(out)
+        }
         "add" => |args, _| {
             let mut args = args.into_iter();
 
@@ -740,14 +754,14 @@ pub fn html(map: &mut HashMap<String, Variable>) {
 
                  if args.len() != 2 {
                     panic!(
-                        Err::MissingArgs("_p".to_string())
+                        Err::MissingArgs("el_".to_string() + $tag)
                     )
                 }
 
                 let mut args = args.into_iter();
 
                 Variable::Str(format!(
-                    "<{} {}> {} </{} >",
+                    "<{} {}>{}</{}>",
                     $tag,
                     args.next_back().unwrap(),
                     args.next().unwrap(),
@@ -758,8 +772,47 @@ pub fn html(map: &mut HashMap<String, Variable>) {
         };
     }
 
+    insert_elem! {
+        "custom" => |mut args, _| {
+            if args.len() == 2 {
+                args.push(
+                    Variable::Str("".to_string())
+                );
+            }
+            if args.len() != 3 {
+                panic!(
+                    Err::MissingArgs("el_".to_string() + "custom")
+                )
+            }
+
+            let mut args = args.into_iter();
+
+            let name = args.next().unwrap();
+
+            Variable::Str(format!(
+                    "<{} {}>{}</{}>",
+                    name,
+                    args.next_back().unwrap(),
+                    args.next().unwrap(),
+                    name
+            ))
+        }
+        // For HTML comment
+        "comment" => |args, _| {
+            let mut comment_content = String::new();
+
+            let mut args = args.into_iter();
+
+            while let Some(arg) = args.next() {
+                comment_content += &arg.to_string();
+            }
+
+            Variable::Str(format!("<!-- {} -->", comment_content))
+        }
+    }
+
     elem!(
         "p", "tag", "head", "title", "meta", "h1", "h2", "h3", "h4", "h5", "h6", "div", "span",
-        "header", "code", "samp", "pre", "link", "a", "img", "script"
+        "header", "code", "samp", "pre", "link", "a", "img", "script", "body"
     );
 }
