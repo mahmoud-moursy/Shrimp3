@@ -45,7 +45,7 @@ pub fn parse(tokens: Vec<Token>) -> anyhow::Result<Vec<Node>> {
             }
             let mut out = parse(curly_content)?;
 
-            // FIXME: Hacky/buggy workaround for a bug.
+            // FIXME: Hack/buggy workaround for a bug.
             // Prune closing statements.
             while matches!(
                 if out.len() > 0 {
@@ -190,7 +190,7 @@ pub fn make_fn_call(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
                 name: match node {
                     Node::Term(Token::Ident(ident)) => ident,
                     any => panic!(Err::SPEUnexpectedNode(
-                        Node::Term(Token::Ident("id".to_string())),
+                        Node::Term(Token::Ident("id".into())),
                         any
                     )),
                 },
@@ -210,7 +210,36 @@ pub fn make_fn_call(nodes: Vec<Node>) -> anyhow::Result<Vec<Node>> {
                 },
             });
             continue;
-        } else if node == Node::Term(Token::EndLine) {
+        } else if let Node::Term(Token::Ident(id)) = node.clone()
+            && let Some(Node::Array(idx)) = nodes.peek() {
+                if idx.len() == 1 && let Some(Node::Term(Token::Num(num))) = idx.get(0) {
+                    final_out.push(
+                        Node::CallExpr {
+                            name: "index".into(),
+                            args: vec![Node::Term(Token::Ident(id)), Node::Term(Token::Num(*num))],
+                            // index(arr 0)
+                            assign_to: {
+                                        nodes.next();
+                                        nodes.next();
+                                        match nodes.peek() {
+                                            Some(Node::Term(Token::ArrowAssigner)) => {
+                                                match nodes.next() {
+                                                    Some(Node::Term(Token::Ident(var_name))) => Some(var_name),
+                                                    any => {
+                                                        bail!(Err::UnexpectedNode(any)); },
+                                                }
+                                            }
+                                            _ => None,
+                                        }
+                            }
+                            // index(arr 0) -> x
+                        }
+                    );
+                    nodes.next();
+                    continue;
+                }
+        }
+        else if node == Node::Term(Token::EndLine) {
             continue;
         };
         final_out.push(node)

@@ -1,7 +1,8 @@
 [package]
 name = "shrimp"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
+author = "Mahmoud Moursy"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,4 +21,4 @@ rayon = "^1.5.1"
 # Async all the things!
 tokio = { version = "^1.14.0", features = ["full"] }
 # Faster hashmap
-dashmap = "^4.0.2"
+dashmap = "^5.0.0"

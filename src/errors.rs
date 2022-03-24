@@ -48,8 +48,10 @@ pub enum Err {
     NoMain,
     #[error("There was in error in converting {} into a number (num function called)", .0.as_words())]
     NumParserError(Variable),
-    #[error("Index out of bounds!")]
-    OutOfBoundsIndex
+    #[error("Index out of bounds (len is {0} but index is {1})!")]
+    OutOfBoundsIndex(usize, usize),
+    #[error("The Shrimp Parser failed with the following out (NOT USER ERROR) {0}")]
+    SPEGeneric(String)
 }
 
 #[macro_export]

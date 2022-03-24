@@ -49,16 +49,7 @@ impl Clone for Token {
             Str(string) => Str(string.clone()),
             Ident(id) => Ident(id.clone()),
             Num(num) => Num(*num),
-            FunctionDecl => FunctionDecl,
-            EndLine => EndLine,
-            OpenCurly => OpenCurly,
-            CloseCurly => CloseCurly,
-            OpenBracket => OpenBracket,
-            CloseBracket => CloseBracket,
-            OpenSquare => OpenSquare,
-            CloseSquare => CloseSquare,
-            ArrowAssigner => ArrowAssigner,
-            ForAssigner => ForAssigner
+            any => any.clone()
         }
     }
 }
@@ -115,9 +106,7 @@ impl std::fmt::Display for Token {
                     CloseSquare => "]",
                     ForAssigner => "=>",
                     ArrowAssigner => "->",
-                    _ => {
-                        "Shrimp parser fmt::display has had an error. :("
-                    }
+                    any => panic!(Err::SPEGeneric(format!("Token::fmt(_, _) failed! Not a user error. (Unexpected {any:?} tok in fmt)")))
                 }
                 .to_string(),
             }

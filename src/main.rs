@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 use std::fs::File;
 
 use anyhow::Result;

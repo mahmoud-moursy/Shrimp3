@@ -42,6 +42,35 @@ pub fn construct_lib() -> HashMap<String, Variable> {
             println!("Hello world!");
             Variable::Void
         }
+        "len" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(1, args.len()))
+            }
+            Variable::Num(match args.remove(0) {
+                Variable::Array(arr) => arr.len(),
+                Variable::Str(string) => string.len(),
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Array(vec![]),
+                    any
+                ))
+            } as f32)
+        }
+        // bnd == bounds.
+        // This function returns the length-1, AKA the maximum
+        // bound for indexing.
+        "bnd" => |mut args, _| {
+            if args.len() != 1 {
+                panic!(Err::IncorrectArgCount(1, args.len()))
+            }
+            Variable::Num(match args.remove(0) {
+                Variable::Array(arr) => arr.len() - 1,
+                Variable::Str(string) => string.len() - 1,
+                any => panic!(Err::VarTypeMismatch(
+                    Variable::Array(vec![]),
+                    any
+                ))
+            } as f32)
+        }
         "pop" => |mut args, _| {
             if args.len() != 1 {
                 panic!(Err::IncorrectArgCount(1, args.len()));
@@ -70,9 +99,30 @@ pub fn construct_lib() -> HashMap<String, Variable> {
                         ))
                     };
 
+                    if idx >= arr.len() {
+                        panic!(Err::OutOfBoundsIndex(arr.len(), idx))
+                    }
+
                     arr.remove(
                         idx
                     )
+                },
+                Variable::Str(mut arr) => {
+                    let idx = match args.remove(0) {
+                        Variable::Num(num) => num as usize,
+                        any => panic!(Err::VarTypeMismatch(
+                            Variable::Num(0.0),
+                            any
+                        ))
+                    };
+
+                    if idx >= arr.len() {
+                        panic!(Err::OutOfBoundsIndex(arr.len(), idx))
+                    }
+
+                    Variable::Str(arr.remove(
+                        idx
+                    ).into())
                 },
                 any => panic!(Err::VarTypeMismatch(
                             Variable::Array(vec![]),
@@ -143,7 +193,7 @@ pub fn construct_lib() -> HashMap<String, Variable> {
 
             *match array.get_mut(index) {
                 Some(arr) => arr,
-                None => panic!(Err::OutOfBoundsIndex)
+                None => panic!(Err::OutOfBoundsIndex(array.len(), index))
             } = elem;
 
             Variable::Array(array)

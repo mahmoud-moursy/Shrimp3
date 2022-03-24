@@ -43,7 +43,7 @@ Some other minor changes have been made, here is a taste of the syntax
 
 ```
 @main(args) {
-	# The below code works too! #
+	# Though ugly, the below code works too! #
 	println(args) println(args)
 }
 ```
@@ -58,7 +58,7 @@ Removes the last value of an array and returns the array without that value.
 Does *not* modify the actual array.
 
 #### `index(Array Number) -> {value}`
-Indexes an array. Panics if the index is out of bounds.
+Indexes an array. Panics if the index is out of bounds. Alternatively, you can do `Array[Number]` to index an array.
 
 #### `index_v(Array Number) -> {value}`
 Indexes an array. Returns `Void` if the index is out of bounds.
