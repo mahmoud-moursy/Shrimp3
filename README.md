@@ -1,21 +1,22 @@
 # ShrimpLang 3.0
 
-A complete rework of ShrimpLang 2. This release is focused on speed, an improved codebase and better debugging features.
+A complete rework of ShrimpLang 2. This release is focused on speed, an improved codebase and better debugging features; additionally, the syntax has been overhauled once more.
 
-Oh, and also, `$` to access variables is being removed! (Yay!)
+### Documentation
 
-### Docs-ish (they are not good.)
+#### The docs need improvement.
 
-#### Why the docs need improvement.
+They show mechanically **how** you do something, but never **why** you would do it, and they provide no in-depth explanation or walk-throughs. This is especially critical due to the language's unconventional syntax.
+Additionally, as the language has evolved (and syntax changes have been made), a few parts of the documentation might have been left out due to oversight.
 
-They show mechanically **how** you do something, but never **why** you would do it, and they provide no in-depth explanation or walk-throughs. This is especially critical due to the language's unconventional syntax. That being said, I do not have the energy to create complete and satisfying documentation for ShrimpLang, so this will have to do.
+That being said, considering that this is a tiny project that few will see, I do not have the time to create complete and satisfying documentation for ShrimpLang, so this will have to do.
 
 ##### - Libraries are here! Check out the [internet library](internet.md)!
 
 ### TODOs:
 - Grow Shrimp!
 ### FIXMEs:
-- Fix bug where the rest of the args will not be collected and sent to the program (low priority)
+- Fix bug where the rest of the command-line arguments will not be collected and sent to the program (low priority)
 
 ### Basic syntax
 
@@ -33,11 +34,13 @@ It lets you assign the output of a function to a variable.
 Some other minor changes have been made, here is a taste of the syntax
 
 ```
-# `args` is a required parameter in every
-# program.
+# `args` is a required parameter in every #
+# program.                                #
 @main(args) {
 	# Prints arguments given to the program #
 	println(args)
+	# Because of how the way that the parser works, this is valid and returns 3 #
+	add(1 1 1)
 }
 ```
 
@@ -48,7 +51,7 @@ Some other minor changes have been made, here is a taste of the syntax
 }
 ```
 
-### Documentation
+### Documented functions
 
 #### `push(Array {value}+) -> Array`
 Pushes `n` values onto an Array type and returns that array. Does *not* modify the initial array.
@@ -73,6 +76,8 @@ Prints out the specified values.
 
 #### `hello_world()`
 Equivalent to `println("Hello world!")`, but uses less characters. Extremely practical and fundamental to the design of the language.
+
+In all seriousness though, this was just used for debugging purposes, and was the first ever Shrimp3 standard library function.
 
 #### `eq({value}(2+))`
 Checks if all the values specified are equal. Must specify at least two values.
@@ -186,8 +191,8 @@ Converts a value into a string.
 @main(args) {
 	decl x "Hi"
 	del x
-	# This will error out because
-	# `x` has been deleted.
+	# This will error out because #
+	# `x` has been deleted. #
 	println(x)
 }
 ```
